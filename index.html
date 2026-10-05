@@ -869,17 +869,19 @@ function makeDb(sb){
 function loginMsg(t,bad){$('loginMsg').textContent=t;$('loginMsg').style.color=bad?'var(--heart)':'var(--muted)'}
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();$('loginBtn').disabled=true;loginMsg('Logging in…');
-  const {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPw').value});
+  let data,error;
+  try{({data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPw').value}))}catch(e){error=e}
   $('loginBtn').disabled=false;
-  if(error){loginMsg(/confirm/i.test(error.message)?'Confirm your email first: tap the link in the email we sent you, then log in here.':'That email and password don\'t match. First time here? Tap "Create your password".',true);return}
+  if(error){const m=error.message||String(error);loginMsg(/confirm/i.test(m)?'Confirm your email first: tap the link in the email we sent you, then log in here.':/invalid login/i.test(m)?'That email and password don\'t match. First time here? Tap "Create your password".':'Could not log in: '+m,true);return}
   start(data.session);
 });
 $('signupBtn').addEventListener('click',async()=>{
   const email=$('loginEmail').value.trim(),pw=$('loginPw').value;
   if(!email||pw.length<6){loginMsg('Fill in your email and a password of at least 6 characters, then tap this again.',true);return}
   loginMsg('Creating your account…');
-  const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.href.split('#')[0]}});
-  if(error){loginMsg(/registered/i.test(error.message)?'You already have an account. Use Log in.':error.message,true);return}
+  let data,error;
+  try{({data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.href.split('#')[0]}}))}catch(e){error=e}
+  if(error){loginMsg(/registered/i.test(error.message||'')?'You already have an account. Use Log in.':'Could not create your account: '+(error.message||error),true);return}
   if(data.session)return start(data.session);
   loginMsg('Almost there. Open the email we just sent and tap the confirmation link. Then come back here and log in.');
 });
