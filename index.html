@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hasta Pronto</title>
+<meta name="theme-color" content="#d6336c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Hasta Pronto">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: one app column with a bottom tab bar; each tab is one screen. Orange = Netherlands side, green = Mexico side, carried over from the countdown. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --fg:#1d2420; --muted:#66706a; --line:#dde1dc;
+  --nl:#e0601a; --mx:#0f7a52; --nl-soft:#fbe6d9; --mx-soft:#d8efe4;
+  --heart:#d6336c; --paper:#fffaf0; --paper-2:#fdf0d2; --paper-3:#e9f3ff; --paper-ink:#3a2f22;
+  --glass:rgba(150,190,200,.16); --glass-line:#9fb6bb; --lid:#b9a27a;
+  --shadow:0 1px 2px rgba(20,30,25,.06),0 4px 16px rgba(20,30,25,.06);
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --hand:"Caveat","Segoe Print","Bradley Hand",cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141816; --surface:#1c211e; --fg:#eaeee9; --muted:#9aa49d; --line:#2e3531;
+  --nl:#ff8a4a; --mx:#3fc48f; --nl-soft:#3a2518; --mx-soft:#16332a;
+  --heart:#ff6b9a; --paper:#f6eedc; --paper-2:#f1e2bd; --paper-3:#dbe8f6; --paper-ink:#2e261b;
+  --glass:rgba(150,200,210,.08); --glass-line:#56717a; --lid:#8c7956;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141816; --surface:#1c211e; --fg:#eaeee9; --muted:#9aa49d; --line:#2e3531;
+  --nl:#ff8a4a; --mx:#3fc48f; --nl-soft:#3a2518; --mx-soft:#16332a;
+  --heart:#ff6b9a; --paper:#f6eedc; --paper-2:#f1e2bd; --paper-3:#dbe8f6; --paper-ink:#2e261b;
+  --glass:rgba(150,200,210,.08); --glass-line:#56717a; --lid:#8c7956;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.5}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:20px 120px;display:grid;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em;margin:0;display:flex;gap:.35em;align-items:baseline;flex-wrap:wrap}
+.brand .nl{color:var(--nl)} .brand .mx{color:var(--mx)} .brand .sep{color:var(--muted);font-weight:500;font-size:14px}
+.me-pill{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.me-pill b{color:var(--fg);font-weight:600}
+h2{font-family:var(--display);font-weight:500;font-size:22px;line-height:1.15;margin:0;text-wrap:balance}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:0}
+.lede{color:var(--muted);margin:4px 0 0;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px;min-width:0}
+.screen{display:grid;gap:18px}
+.screen[hidden]{display:none}
+.muted{color:var(--muted)} .small{font-size:13px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn:hover{border-color:var(--muted)}
+a.btn{color:inherit;text-decoration:none}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.primary:hover{opacity:.9}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:6px 8px}
+.btn:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+input[type=text],input[type=url],input[type=datetime-local],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 200px;min-width:0}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.dot.nl{background:var(--nl)} .dot.mx{background:var(--mx)}
+.banner{border:1px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--muted)}
+
+/* Countdown */
+.count{position:relative;overflow:hidden;padding-top:24px}
+.count::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--nl) 50%,var(--mx) 50%)}
+.big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.days{font-family:var(--display);font-weight:700;font-size:clamp(64px,16vw,104px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.dlabel{font-size:16px;color:var(--muted)}
+.exact{font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums;display:flex;gap:14px;flex-wrap:wrap}
+.exact small{font-size:12px;color:var(--muted);margin-left:2px}
+.clocks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.clock{border-radius:10px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.clock.nl{background:var(--nl-soft)} .clock.mx{background:var(--mx-soft)}
+.clock .who{font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center}
+.clock .time{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums}
+.clock .hint{font-size:12px;color:var(--muted)}
+.clock .wx{font-size:14px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.clock .wx b{font-family:var(--display);font-weight:500;font-size:18px;font-variant-numeric:tabular-nums}
+.clock .wx span{color:var(--muted);font-size:12px}
+
+/* Thinking of you */
+.tou{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.heartbtn{width:92px;height:92px;border-radius:50%;border:none;background:var(--heart);color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow);position:relative}
+.heartbtn svg{width:46px;height:46px;fill:#fff}
+.heartbtn:active{transform:scale(.94)}
+.heartbtn:disabled{opacity:.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+.chip:hover:not(:disabled){border-color:var(--heart);color:var(--heart)}
+.chip:disabled{opacity:.5;cursor:default}
+.chip[aria-checked=true]{background:var(--heart);border-color:var(--heart);color:#fff}
+.note .mood{font-family:var(--body);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a7a62;display:block;margin-bottom:6px}
+.received{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--bg)}
+.received svg{width:22px;height:22px;fill:var(--heart);flex:none}
+.received.fresh svg{animation:beat 1.1s ease-in-out 3}
+@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(.95)}}
+.burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:50}
+.burst span{position:absolute;width:22px;height:22px;animation:floatup 1.6s ease-out forwards}
+.burst svg{width:100%;height:100%;fill:var(--heart)}
+@keyframes floatup{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--dx),-180px) scale(1.3);opacity:0}}
+
+.ans{border-radius:10px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.ans.nl{background:var(--nl-soft)} .ans.mx{background:var(--mx-soft)}
+.ans b{font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center}
+.ans p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.ans.locked p{filter:blur(5px);user-select:none}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.answers{grid-template-columns:1fr}}
+.past{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.past:last-child{border-bottom:none}
+.envs{display:flex;flex-wrap:wrap;gap:10px}
+.env{border:none;background:none;padding:0;cursor:pointer;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.env svg{width:76px;height:52px}
+.env:disabled{cursor:default}
+@media (prefers-reduced-motion:no-preference){.env:not(:disabled):hover svg{transform:translateY(-3px) rotate(-2deg);transition:transform .2s}}
+.mine-sealed{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mine-sealed:last-child{border-bottom:none}
+.mine-sealed span{overflow-wrap:anywhere;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;cursor:pointer;display:grid;gap:2px;min-width:0}
+.tile:hover{border-color:var(--muted)}
+.tile b{font-family:var(--display);font-size:24px;font-weight:500;font-variant-numeric:tabular-nums}
+.tile span{font-size:12px;color:var(--muted);line-height:1.3}
+@media (max-width:440px){.tiles{grid-template-columns:1fr 1fr 1fr}.tile b{font-size:20px}.tou{grid-template-columns:1fr;justify-items:start}}
+details.settings summary{cursor:pointer;color:var(--muted);font-size:14px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px}
+
+/* Jar */
+.jarwrap{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center}
+@media (max-width:560px){.jarwrap{grid-template-columns:1fr;justify-items:center;text-align:center}.jarwrap .row{justify-content:center}}
+.jar{width:200px;max-width:100%;height:auto}
+.note{background:var(--paper);color:var(--paper-ink);border-radius:4px;padding:22px 22px 18px;box-shadow:var(--shadow);font-family:var(--hand);font-size:26px;line-height:1.25;position:relative;transform:rotate(-1.2deg);white-space:pre-wrap;overflow-wrap:anywhere;background-image:repeating-linear-gradient(transparent 0 31px,rgba(80,110,160,.18) 31px 32px)}
+.note .meta{font-family:var(--body);font-size:12px;color:#6d6252;margin-top:10px}
+@media (prefers-reduced-motion:no-preference){.note.pop{animation:pop .6s cubic-bezier(.2,.9,.3,1.2)}}
+@keyframes pop{from{transform:translateY(40px) rotate(6deg) scale(.6);opacity:0}to{transform:rotate(-1.2deg);opacity:1}}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.readnote{background:var(--bg);border-radius:8px;padding:10px 12px;display:grid;gap:4px}
+.readnote p{margin:0;font-family:var(--hand);font-size:21px;line-height:1.2;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Bucket */
+.bitem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 4px;border-bottom:1px solid var(--line)}
+.bitem:last-child{border-bottom:none}
+.bitem input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--mx)}
+.bitem label{min-width:0;cursor:pointer}.bitem .txt{display:block;overflow-wrap:anywhere}
+.bitem.done .txt{text-decoration:line-through;color:var(--muted)}
+.bitem .by{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:none;background:transparent;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+
+/* Days */
+.strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
+.dayb{flex:none;width:54px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 0;cursor:pointer;display:grid;justify-items:center;gap:1px;scroll-snap-align:end}
+.dayb .wd{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dayb .dn{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.dayb .dots{display:flex;gap:3px;height:8px;align-items:center}
+.dayb .dots .dot{width:6px;height:6px}
+.dayb[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dayb[aria-pressed=true] .wd{color:var(--bg);opacity:.7}
+.daycols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.daycols{grid-template-columns:1fr}}
+.daycol{border-top:4px solid var(--c);}
+.daycol.nl{--c:var(--nl)} .daycol.mx{--c:var(--mx)}
+.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.ph{position:relative;margin:0;display:grid;gap:4px;min-width:0}
+.ph button.img{padding:0;border:none;background:var(--bg);border-radius:8px;overflow:hidden;cursor:zoom-in;aspect-ratio:1;width:100%;max-width:100%}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph figcaption{font-size:13px;overflow-wrap:anywhere}
+.ph input{font-size:13px;padding:5px 7px}
+.ph .del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:6px;font-size:12px;padding:3px 7px;cursor:pointer}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:14px}
+.upl{position:relative;overflow:hidden}
+.upl input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:60;display:grid;place-items:center;padding:20px;gap:10px;grid-template-rows:1fr auto}
+.lightbox img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:6px;align-self:center;justify-self:center}
+.lightbox p{color:#fff;margin:0;text-align:center}
+.lightbox[hidden]{display:none}
+
+/* Play */
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.game{display:grid;gap:4px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-decoration:none;color:inherit;min-width:0}
+.game:hover{border-color:var(--muted)}
+.game b{font-weight:600;display:flex;gap:8px;align-items:center}
+.game .pic{font-size:20px;line-height:1}
+.game span{font-size:13px;color:var(--muted)}
+.game em{font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mx)}
+.question{font-family:var(--display);font-weight:500;font-size:19px;line-height:1.3;text-wrap:balance;margin:0}
+
+/* Nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:40}
+nav.tabs ul{list-style:none;margin:0 auto;padding:0;max-width:720px;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs a{display:grid;justify-items:center;gap:2px;padding:6px 0;text-decoration:none;color:var(--muted);font-size:12px;border-radius:8px;position:relative}
+nav.tabs a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs a[aria-current=page]{color:var(--fg);font-weight:600}
+nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--heart);color:#fff;border-radius:999px;font-size:10px;min-width:16px;padding:0 4px;line-height:16px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;z-index:70;max-width:calc(100% - 32px);text-align:center}
+.toast[hidden]{display:none}
+.modal{position:fixed;inset:0;background:rgba(10,15,12,.55);z-index:80;display:grid;place-items:center;padding:16px}
+.modal[hidden]{display:none}
+.modal .card{max-width:420px;width:100%}
+.modal.login{background:var(--bg)}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick button{padding:16px 10px;border-radius:12px;border:2px solid var(--line);background:var(--surface);cursor:pointer;display:grid;gap:4px;justify-items:center}
+.pick button.nl:hover,.pick button.nl:focus-visible{border-color:var(--nl)}
+.pick button.mx:hover,.pick button.mx:focus-visible{border-color:var(--mx)}
+.pick b{font-family:var(--display);font-weight:500}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand"><span class="nl">Tot snel</span><span class="sep">⇄</span><span class="mx">Hasta pronto</span></h1>
+    <button class="me-pill" id="mePill" type="button" title="Log out">…</button>
+  </header>
+
+  <!-- HOME -->
+  <section class="screen" id="s-home" aria-labelledby="h-home">
+    <h2 id="h-home" class="sr" hidden>Home</h2>
+    <article class="card count" aria-label="Countdown">
+      <div class="big"><span class="days" id="cdDays">0</span><span class="dlabel" id="cdLabel">days to go</span></div>
+      <div class="exact" id="cdExact"></div>
+      <div class="small muted" id="cdTarget"></div>
+      <div class="clocks">
+        <div class="clock nl"><span class="who"><span class="dot nl"></span><span data-name="nl"></span></span><span class="time" id="clkNl">--:--</span><span class="hint" id="hintNl"></span><span class="wx" id="wxNl"></span></div>
+        <div class="clock mx"><span class="who"><span class="dot mx"></span><span data-name="mx"></span></span><span class="time" id="clkMx">--:--</span><span class="hint" id="hintMx"></span><span class="wx" id="wxMx"></span></div>
+      </div>
+    </article>
+
+    <article class="card" aria-labelledby="h-daily">
+      <div class="row" style="justify-content:space-between"><h3 id="h-daily">Today's question</h3><span class="small muted" id="dailyDate"></span></div>
+      <p class="question" id="dailyQ"></p>
+      <div id="dailyAsk" style="display:grid;gap:10px">
+        <textarea id="dailyText" maxlength="1000" placeholder="Your answer stays hidden until you've both answered." aria-label="Your answer"></textarea>
+        <div class="row"><button class="btn primary" id="dailySend" type="button">Lock in my answer</button><button class="btn ghost" id="dailyCancel" type="button" hidden>Cancel</button><span class="small muted" id="dailyHint"></span></div>
+      </div>
+      <div id="dailyOut" style="display:grid;gap:10px"></div>
+      <details id="dailyPast" hidden><summary class="muted small">Earlier questions</summary><div id="dailyPastList"></div></details>
+    </article>
+
+    <article class="card" aria-labelledby="h-tou">
+      <h3 id="h-tou">Thinking of you</h3>
+      <div class="received" id="received"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span id="receivedTxt">Nothing yet.</span></div>
+      <div class="tou">
+        <button class="heartbtn" id="heartBtn" type="button" aria-label="Send: thinking of you"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+        <div style="display:grid;gap:8px;min-width:0">
+          <div class="small muted" id="tapHelp">Tap the heart so they know you're thinking of them, or send something specific.</div>
+          <div class="chips" id="tapChips"></div>
+          <div class="small muted" id="sentInfo"></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card" aria-labelledby="h-sealed">
+      <h3 id="h-sealed">Sealed until we meet</h3>
+      <div id="sealedBody" style="display:grid;gap:12px"></div>
+      <details id="sealedWrite"><summary class="muted small" id="sealedSum">Write a sealed letter</summary>
+        <div style="display:grid;gap:10px;margin-top:12px">
+          <textarea id="sealedText" maxlength="5000" style="min-height:140px" placeholder="Take your time. What you feel right now, what you missed most this week, what you can't wait to do, a promise for when you're together…"></textarea>
+          <div class="row"><button class="btn primary" id="addSealed" type="button">Seal it</button><span class="small muted">You'll open it together when the countdown reaches zero.</span></div>
+          <div id="mySealed"></div>
+        </div>
+      </details>
+    </article>
+
+    <details class="card settings" id="settingsBox">
+      <summary>Settings: names, date and place</summary>
+      <div class="sgrid">
+        <div><label class="lbl" for="nameNl">Name on the Netherlands side</label><input type="text" id="nameNl" maxlength="30" placeholder="e.g. Juul"></div>
+        <div><label class="lbl" for="nameMx">Name on the Mexico side</label><input type="text" id="nameMx" maxlength="30" placeholder="Their name"></div>
+        <div><label class="lbl" for="cityNl">City in the Netherlands</label><input type="text" id="cityNl" maxlength="60" placeholder="e.g. Volkel"></div>
+        <div><label class="lbl" for="cityMx">City in Mexico</label><input type="text" id="cityMx" maxlength="60" placeholder="e.g. Tijuana"></div>
+        <div><label class="lbl" for="target">We see each other on</label><input type="datetime-local" id="target"></div>
+        <div><label class="lbl" for="mxzone">Place in Mexico</label>
+          <select id="mxzone">
+            <option value="America/Tijuana">Tijuana, Baja California</option>
+            <option value="America/Hermosillo">Hermosillo, Sonora</option>
+            <option value="America/Mazatlan">Mazatlán, Sinaloa</option>
+            <option value="America/Mexico_City">Mexico City</option>
+            <option value="America/Cancun">Cancún, Quintana Roo</option>
+          </select></div>
+      </div>
+      <div class="row"><button class="btn primary" id="saveSettings" type="button">Save for both of us</button><button class="btn ghost" id="logoutBtn" type="button">Log out</button></div>
+    </details>
+  </section>
+
+  <!-- JAR -->
+  <section class="screen" id="s-jar" hidden aria-labelledby="h-jar">
+    <div><h2 id="h-jar">The jar</h2><p class="lede">Short notes for hard moments. Tap how you feel and pull out a note from <span data-name-partner>them</span>.</p></div>
+    <article class="card">
+      <div class="jarwrap">
+        <svg class="jar" id="jarSvg" viewBox="0 0 220 270" role="img" aria-label="Jar with notes"></svg>
+        <div style="display:grid;gap:10px;min-width:0">
+          <h3>How do you feel?</h3>
+          <div class="chips" id="moodPick"></div>
+          <div id="jarCount" class="small muted"></div>
+        </div>
+      </div>
+      <div id="picked" hidden></div>
+    </article>
+    <article class="card">
+      <h3 id="writeH">Write a note</h3>
+      <div><span class="lbl">For when they feel</span><div class="chips" id="moodWrite" role="radiogroup" aria-label="Feeling"></div></div>
+      <textarea id="noteText" maxlength="240" style="min-height:70px" placeholder="Keep it short, like a sticky note."></textarea>
+      <div class="row" style="justify-content:space-between"><button class="btn primary" id="addNote" type="button">Put it in the jar</button><span class="small muted" id="noteLeft">240 left</span></div>
+    </article>
+    <details class="card"><summary class="muted">Notes you've read</summary><ul class="list" id="readList" style="margin-top:12px"></ul></details>
+  </section>
+
+  <!-- BUCKET -->
+  <section class="screen" id="s-bucket" hidden aria-labelledby="h-bucket">
+    <div><h2 id="h-bucket">When we're together</h2><p class="lede">Everything you want to do once you're in the same place again.</p></div>
+    <article class="card">
+      <form class="row" id="bucketForm"><input class="grow" type="text" id="bucketText" maxlength="200" placeholder="Eat tacos al pastor at midnight, cycle to the beach…" aria-label="New bucket list item"><button class="btn primary" type="submit">Add</button></form>
+      <div class="row" style="justify-content:space-between"><div class="seg" role="group" aria-label="Filter"><button type="button" data-f="todo" aria-pressed="true">To do</button><button type="button" data-f="done" aria-pressed="false">Done</button><button type="button" data-f="all" aria-pressed="false">All</button></div><span class="small muted" id="bucketStat"></span></div>
+      <ul class="list" id="bucketList" style="gap:0"></ul>
+    </article>
+  </section>
+
+  <!-- TREAT -->
+  <section class="screen" id="s-treat" hidden aria-labelledby="h-treat">
+    <div><h2 id="h-treat">Send a treat</h2><p class="lede">Surprise them with food or a snack, delivered to their door.</p></div>
+    <article class="card" aria-label="Send a treat">
+            <div id="treatBody" style="display:grid;gap:12px"></div>
+      <details id="myTreat"><summary class="muted small">Your delivery details</summary>
+        <div style="display:grid;gap:10px;margin-top:12px">
+          <div><label class="lbl" for="myAddr">Your address</label><textarea id="myAddr" maxlength="300" style="min-height:64px" placeholder="Street, number, postcode, city"></textarea></div>
+          <div><label class="lbl" for="myFavs">Snacks and food you love</label><textarea id="myFavs" maxlength="400" style="min-height:64px" placeholder="Stroopwafels, the poke bowl from…, never coriander"></textarea></div>
+          <div class="row"><button class="btn primary" id="saveTreat" type="button">Save my details</button><span class="small muted">Only the two of you can see this.</span></div>
+        </div>
+      </details>
+    </article>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="s-play" hidden aria-labelledby="h-play">
+    <div><h2 id="h-play">Play together</h2><p class="lede">Games and apps that work over a video call. Each of you opens the same link and joins the same room.</p></div>
+    <article class="card">
+      <h3>Question for tonight's call</h3>
+      <p class="question" id="question"></p>
+      <div class="row"><button class="btn" id="nextQ" type="button">Another question</button></div>
+    </article>
+    <div id="gameGroups" style="display:grid;gap:18px"></div>
+    <article class="card">
+      <h3>Your own links</h3>
+      <ul class="list" id="linkList"></ul>
+      <form class="row" id="linkForm"><input class="grow" type="text" id="linkTitle" maxlength="60" placeholder="Name, e.g. Our Spotify playlist" aria-label="Link name"><input class="grow" type="url" id="linkUrl" placeholder="https://…" aria-label="Link address"><button class="btn primary" type="submit">Add link</button></form>
+    </article>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections"><ul>
+  <li><a href="#home" data-tab="home"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Home</a></li>
+  <li><a href="#jar" data-tab="jar"><svg viewBox="0 0 24 24"><path d="M8 3h8v3H8zM7 6h10c1.7 0 3 1.3 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V9c0-1.7 1.3-3 3-3z"/><path d="M8 13h4M10 16h5"/></svg>Jar</a></li>
+  <li><a href="#bucket" data-tab="bucket"><svg viewBox="0 0 24 24"><path d="M4 7h16l-2 13H6zM8 7a4 4 0 0 1 8 0"/><path d="M9 13l2 2 4-4"/></svg>Bucket list</a></li>
+  <li><a href="#treat" data-tab="treat"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M2 9h20M12 9v12M12 9c-2-4-7-5-7-2s4 2 7 2c3 0 7 1 7-2s-5-2-7 2"/></svg>Treat</a></li>
+  <li><a href="#play" data-tab="play"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4M15.5 12h.01M18 14h.01"/></svg>Play</a></li>
+</ul></nav>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="lightbox" id="lightbox" hidden><img id="lbImg" alt=""><p id="lbCap"></p></div>
+<div class="modal login" id="login" hidden role="dialog" aria-modal="true" aria-labelledby="loginH">
+  <form class="card" id="loginForm">
+    <h2 id="loginH" class="brand"><span class="nl">Tot snel</span><span class="sep">⇄</span><span class="mx">Hasta pronto</span></h2>
+    <p class="muted small" style="margin:0" id="loginLede">Log in to your shared space.</p>
+    <div><label class="lbl" for="loginEmail">Email</label><input type="email" id="loginEmail" autocomplete="email" required style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%"></div>
+    <div><label class="lbl" for="loginPw">Password</label><input type="password" id="loginPw" autocomplete="current-password" minlength="6" required style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%"></div>
+    <div class="row"><button class="btn primary" type="submit" id="loginBtn">Log in</button><button class="btn ghost" type="button" id="signupBtn">First time? Create your password</button></div>
+    <p class="small" id="loginMsg" style="margin:0" role="status"></p>
+  </form>
+</div>
+
+<script>
+(function(){
+'use strict';
+const NL='Europe/Amsterdam';
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+const S={
+  settings:{target:'2026-12-24T00:00',mxzone:'America/Mexico_City',names:{nl:'',mx:''},cities:{nl:{name:'Volkel'},mx:{name:'Tijuana'}}},
+  weather:{},
+  me:null, bucket:[], jar:[], taps:{nl:[],mx:[]}, photos:[], links:[],
+  filter:'todo', day:null, blobs:{}, loaded:{taps:false}
+};
+let db=null, sb=null;
+
+/* ---------- names & zones ---------- */
+const other=s=>s==='nl'?'mx':'nl';
+const nameOf=s=>(S.settings.names&&S.settings.names[s])||(s==='nl'?'Netherlands':'Mexico');
+const zoneOf=s=>s==='nl'?NL:S.settings.mxzone;
+const partner=()=>S.me?other(S.me):'mx';
+const myZone=()=>zoneOf(S.me||'nl');
+
+/* ---------- time helpers (from the countdown) ---------- */
+function parts(zone,d){
+  const f=new Intl.DateTimeFormat('en-US',{timeZone:zone,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const o={}; f.formatToParts(d).forEach(p=>o[p.type]=p.value);
+  return {y:+o.year,m:+o.month,d:+o.day,h:+o.hour%24,mi:+o.minute,s:+o.second};
+}
+function offsetMin(zone,d){const p=parts(zone,d);return (Date.UTC(p.y,p.m-1,p.d,p.h,p.mi,p.s)-Math.floor(d/1000)*1000)/60000}
+function wallToInstant(zone,y,m,d,h,mi){const wall=Date.UTC(y,m-1,d,h,mi);let t=wall-offsetMin(zone,new Date(wall))*60000;t=wall-offsetMin(zone,new Date(t))*60000;return t}
+const dayNum=(y,m,d)=>Math.round(Date.UTC(y,m-1,d)/86400000);
+const fmt=(zone,d,opt)=>new Intl.DateTimeFormat('en-GB',Object.assign({timeZone:zone},opt)).format(d);
+const pad=n=>String(n).padStart(2,'0');
+function dayKey(zone,d){const p=parts(zone,d||new Date());return p.y+'-'+pad(p.m)+'-'+pad(p.d)}
+function keyToDate(k){const [y,m,d]=k.split('-').map(Number);return new Date(Date.UTC(y,m-1,d,12))}
+function ago(t){const s=Math.max(0,(Date.now()-t)/1000);if(s<60)return 'just now';const m=s/60;if(m<60)return Math.floor(m)+' min ago';const h=m/60;if(h<24)return Math.floor(h)+(Math.floor(h)===1?' hour ago':' hours ago');const d=Math.floor(h/24);return d===1?'yesterday':d+' days ago'}
+
+/* ---------- UI helpers ---------- */
+let toastT;
+function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
+function burst(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const b=document.createElement('div');b.className='burst';
+  for(let i=0;i<9;i++){const s=document.createElement('span');s.innerHTML=HEART;s.style.setProperty('--dx',(Math.random()*200-100)+'px');s.style.animationDelay=(i*60)+'ms';s.style.left=(Math.random()*40-20)+'px';b.appendChild(s)}
+  document.body.appendChild(b);setTimeout(()=>b.remove(),2400);
+}
+function needMe(){if(!S.me){toast('Log in first.');return true}return false}
+function writeErr(e){
+  const c=e&&e.code;
+  if(c==='quota_exceeded')toast('Storage is full. Delete a few old notes first.');
+  else if(c==='invalid_argument')toast('That was not allowed. Try logging out and in again.');
+  else toast('That did not save. Check your connection and try again.');
+  console.warn(e);
+}
+function requireDb(){if(!db){toast('Still connecting, try again in a moment.');return false}return true}
+
+/* ---------- tabs ---------- */
+const TABS=['home','jar','bucket','treat','play'];
+function showTab(){
+  let t=(location.hash||'#home').slice(1); if(!TABS.includes(t))t='home';
+  TABS.forEach(x=>{$('s-'+x).hidden=x!==t});
+  document.querySelectorAll('nav.tabs a').forEach(a=>{if(a.dataset.tab===t)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',showTab);
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{location.hash=b.dataset.go}));
+
+/* ---------- who am I ---------- */
+async function logout(){try{await sb.auth.signOut()}catch(e){}location.reload()}
+$('mePill').addEventListener('click',logout);
+$('logoutBtn').addEventListener('click',logout);
+
+/* ---------- settings ---------- */
+let settingsChain=Promise.resolve();
+function saveSettings(){
+  if(!requireDb())return Promise.resolve();
+  const body=JSON.parse(JSON.stringify(S.settings));
+  settingsChain=settingsChain.then(()=>db.doc('app/settings').set(body)).catch(writeErr);
+  return settingsChain;
+}
+function fillSettingsForm(){
+  const a=document.activeElement;
+  if(a!==$('nameNl'))$('nameNl').value=S.settings.names.nl||'';
+  if(a!==$('nameMx'))$('nameMx').value=S.settings.names.mx||'';
+  if(a!==$('target'))$('target').value=S.settings.target;
+  if(a!==$('cityNl'))$('cityNl').value=S.settings.cities.nl.name||'';
+  if(a!==$('cityMx'))$('cityMx').value=S.settings.cities.mx.name||'';
+  if(a!==$('mxzone')&&[...$('mxzone').options].some(o=>o.value===S.settings.mxzone))$('mxzone').value=S.settings.mxzone;
+}
+$('saveSettings').addEventListener('click',async()=>{
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test($('target').value)){toast('Pick a date and time first.');return}
+  const cities=JSON.parse(JSON.stringify(S.settings.cities));const changed=[];
+  [['nl','cityNl'],['mx','cityMx']].forEach(([sd,id])=>{const v=$(id).value.trim();if(v!==cities[sd].name){cities[sd]={name:v,key:''};if(v)changed.push(sd)}});
+  for(const sd of changed){const k=await findCity(cities[sd].name,sd);if(k)cities[sd]=k}
+  S.settings={target:$('target').value.slice(0,16),mxzone:$('mxzone').value,names:{nl:$('nameNl').value.trim(),mx:$('nameMx').value.trim()},cities};
+  renderAll();await saveSettings();if(db)toast('Saved for both of you');
+  if(changed.length)refreshWeather(true);
+});
+
+/* ---------- weather (Open-Meteo, free, no key) ---------- */
+const WMO={0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Cloudy',45:'Fog',48:'Fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',56:'Freezing drizzle',57:'Freezing drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',66:'Freezing rain',67:'Freezing rain',71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow',80:'Showers',81:'Showers',82:'Heavy showers',85:'Snow showers',86:'Snow showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
+async function findCity(q,side){
+  try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=10&language=en&name='+encodeURIComponent(q));const j=await r.json();
+    const rs=j.results||[];const cc=side==='nl'?'NL':'MX';const hit=rs.find(x=>x.country_code===cc)||rs[0];
+    return hit?{name:hit.name,lat:hit.latitude,lon:hit.longitude,key:hit.latitude.toFixed(3)+','+hit.longitude.toFixed(3)}:null}
+  catch(e){console.warn('city search',e);toast('Could not look up that city right now.');return null}
+}
+let wxBusy=false,cityFixing=false;
+async function refreshWeather(){
+  if(wxBusy)return;wxBusy=true;
+  try{
+    if(db&&!cityFixing&&['nl','mx'].some(sd=>S.settings.cities[sd].name&&S.settings.cities[sd].lat==null)){
+      cityFixing=true;const cities=JSON.parse(JSON.stringify(S.settings.cities));
+      for(const sd of ['nl','mx'])if(cities[sd].name&&cities[sd].lat==null){const k=await findCity(cities[sd].name,sd);if(k)cities[sd]=k}
+      S.settings.cities=cities;await saveSettings();cityFixing=false;
+    }
+    for(const sd of ['nl','mx']){
+      const c=S.settings.cities[sd];if(!c||c.lat==null)continue;
+      try{const r=await fetch('https://api.open-meteo.com/v1/forecast?current=temperature_2m,apparent_temperature,weather_code,is_day&latitude='+c.lat+'&longitude='+c.lon);const j=await r.json();const cu=j.current;if(!cu)continue;
+        S.weather[sd]={key:c.key,temp:Math.round(cu.temperature_2m),feels:Math.round(cu.apparent_temperature),phrase:WMO[cu.weather_code]||'',day:!!cu.is_day,at:Date.now()};
+      }catch(e){console.warn('weather',sd,e)}
+    }
+    renderWeather();
+  }finally{wxBusy=false}
+}
+function renderWeather(){
+  ['nl','mx'].forEach(sd=>{
+    const el=$(sd==='nl'?'wxNl':'wxMx'),w=S.weather[sd],c=S.settings.cities[sd];
+    if(!w||!c||!c.key||w.key!==c.key){el.textContent=c&&c.name?c.name:'';return}
+    const old=Date.now()-w.at>3*3600e3;
+    el.innerHTML='<b>'+esc(w.temp)+'°</b>'+'<span>'+esc(w.phrase)+(w.feels!=null&&Math.abs(w.feels-w.temp)>=3?', feels '+esc(w.feels)+'°':'')+' in '+esc(c.name)+(old?' · '+esc(ago(w.at)):'')+'</span>';
+  });
+}
+
+/* ---------- countdown ---------- */
+function tick(){
+  const now=new Date();
+  if(dailyShownKey&&dailyShownKey!==dailyKey())renderDaily();
+  const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(S.settings.target||'');
+  ['nl','mx'].forEach(s=>{
+    const z=zoneOf(s),p=parts(z,now);
+    $(s==='nl'?'clkNl':'clkMx').textContent=pad(p.h)+':'+pad(p.mi);
+    const asleep=p.h>=23||p.h<7, early=p.h>=7&&p.h<9;
+    const isMe=s===S.me;
+    $(s==='nl'?'hintNl':'hintMx').textContent=fmt(z,now,{weekday:'short',day:'numeric',month:'short'})+(isMe?' · you':asleep?' · probably asleep':early?' · just waking up':'');
+  });
+  if(!m)return;
+  const tg={y:+m[1],m:+m[2],d:+m[3],h:+m[4],mi:+m[5]};
+  const z=myZone(),p=parts(z,now);
+  const days=dayNum(tg.y,tg.m,tg.d)-dayNum(p.y,p.m,p.d);
+  const inst=wallToInstant(z,tg.y,tg.m,tg.d,tg.h,tg.mi);
+  const ms=inst-now.getTime();
+  $('cdDays').textContent=Math.max(days,0);
+  $('cdLabel').textContent=days>1?'days until we see each other':days===1?'day until we see each other':days===0?'it is today!':'together again';
+  if(ms>0){const s=Math.floor(ms/1000),D=Math.floor(s/86400),H=Math.floor(s%86400/3600),M=Math.floor(s%3600/60),Sx=s%60;
+    $('cdExact').innerHTML=[[D,'d'],[H,'h'],[M,'m'],[Sx,'s']].map(([v,u])=>'<span>'+(u==='d'?v:pad(v))+'<small>'+u+'</small></span>').join('');}
+  else $('cdExact').innerHTML='<span>Reached</span>';
+  $('cdTarget').textContent='Until '+fmt(z,new Date(inst),{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+' your time';
+}
+
+/* ---------- thinking of you ---------- */
+const KINDS=[['think','Thinking of you'],['miss','Missing you'],['morning','Good morning'],['night','Good night'],['hug','Sending a hug'],['proud','Proud of you'],['call','Call me?']];
+const kindLabel=k=>(KINDS.find(x=>x[0]===k)||KINDS[0])[1];
+$('tapChips').innerHTML=KINDS.slice(1).map(([k,l])=>'<button class="chip" type="button" data-k="'+k+'">'+esc(l)+'</button>').join('');
+$('tapChips').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)sendTap(b.dataset.k)});
+$('heartBtn').addEventListener('click',()=>sendTap('think'));
+let tapBusy=false;
+async function sendTap(k){
+  if(needMe()||!requireDb()||tapBusy)return;
+  tapBusy=true;$('heartBtn').disabled=true;
+  const log=[{k,at:Date.now()}].concat(S.taps[S.me]||[]).slice(0,60);
+  S.taps[S.me]=log;burst();renderTaps();
+  try{await db.doc('taps/'+S.me).set({log});toast('Sent to '+nameOf(partner()))}catch(e){writeErr(e)}
+  setTimeout(()=>{tapBusy=false;$('heartBtn').disabled=false},1500);
+}
+function renderTaps(fresh){
+  const pt=partner(),log=S.taps[pt]||[],last=log[0];
+  const startToday=wallToInstant(myZone(),...dayKey(myZone()).split('-').map(Number),0,0);
+  const today=log.filter(x=>x.at>=startToday).length;
+  $('receivedTxt').textContent=last?(nameOf(pt)+': '+kindLabel(last.k)+' · '+ago(last.at)+(today>1?' · '+today+' times today':'')):(S.me?nameOf(pt)+" hasn't sent a heart yet.":'Pick who you are to see hearts.');
+  $('received').classList.toggle('fresh',!!fresh);
+  const mine=S.me?(S.taps[S.me]||[]):[];
+  $('sentInfo').textContent=mine[0]?'You last sent "'+kindLabel(mine[0].k)+'" '+ago(mine[0].at)+'.':'';
+  $('heartBtn').setAttribute('aria-label','Send '+nameOf(pt)+': thinking of you');
+}
+
+/* ---------- jar ---------- */
+function jarSvg(n){
+  const paper=['var(--paper)','var(--paper-2)','var(--paper-3)','var(--nl-soft)','var(--mx-soft)'];
+  let notes='';const shown=Math.min(n,35);
+  let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  for(let i=0;i<shown;i++){const row=Math.floor(i/5),col=i%5;
+    const x=42+col*28+rnd()*8,y=226-row*20-rnd()*8,r=Math.round(rnd()*70-35);
+    notes+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="26" height="15" rx="2" style="fill:'+paper[i%5]+';stroke:var(--glass-line);stroke-width:.6" transform="rotate('+r+' '+(x+13).toFixed(1)+' '+(y+7).toFixed(1)+')"/>';}
+  return '<rect x="58" y="8" width="104" height="26" rx="6" style="fill:var(--lid)"/>'+
+    '<path d="M58 22h104" style="stroke:rgba(0,0,0,.15);stroke-width:2"/>'+
+    '<path d="M66 34h88v14c26 6 46 24 46 52v128c0 18-14 32-32 32H52c-18 0-32-14-32-32V100c0-28 20-46 46-52z" style="fill:var(--glass);stroke:var(--glass-line);stroke-width:2.5"/>'+
+    notes+
+    '<path d="M38 108c0-18 10-32 26-38" style="fill:none;stroke:rgba(255,255,255,.55);stroke-width:5;stroke-linecap:round"/>'+
+    '<path d="M36 128v70" style="fill:none;stroke:rgba(255,255,255,.35);stroke-width:5;stroke-linecap:round"/>';
+}
+const MOODS=[['miss','I miss you'],['sleep',"I can't sleep"],['sad',"I'm sad"],['laugh','I need a laugh'],['bad','Bad day'],['brave','I need courage']];
+const moodLabel=k=>(MOODS.find(m=>m[0]===k)||[,''])[1];
+let writeMood='miss';
+$('moodPick').innerHTML=MOODS.map(([k,l])=>'<button class="chip" type="button" data-mood="'+k+'">'+esc(l)+'</button>').join('');
+function renderMoodWrite(){$('moodWrite').innerHTML=MOODS.map(([k,l])=>'<button class="chip" type="button" role="radio" aria-checked="'+(k===writeMood)+'" data-wmood="'+k+'">'+esc(l)+'</button>').join('')}
+renderMoodWrite();
+$('moodWrite').addEventListener('click',e=>{const b=e.target.closest('[data-wmood]');if(!b)return;writeMood=b.dataset.wmood;renderMoodWrite()});
+$('noteText').addEventListener('input',()=>{$('noteLeft').textContent=(240-$('noteText').value.length)+' left'});
+function renderJar(){
+  const me=S.me,pt=partner();
+  const forMe=me?S.jar.filter(n=>n.by===pt):[];
+  $('jarSvg').innerHTML=jarSvg(Math.min(forMe.length,25));
+  $('jarSvg').setAttribute('aria-label',forMe.length?'Jar with notes':'Empty jar');
+  document.querySelectorAll('[data-name-partner]').forEach(el=>el.textContent=nameOf(pt));
+  $('jarCount').textContent=!me?'Pick who you are first.':forMe.length?'':'The jar is still empty. Ask '+nameOf(pt)+' to write you a few notes.';
+  document.querySelectorAll('#moodPick [data-mood]').forEach(b=>b.disabled=!forMe.length);
+  $('writeH').textContent='Write a note for '+nameOf(pt);
+  const read=me?S.jar.filter(n=>n.by===pt&&n.opened).sort((a,b)=>(b.openedAt||0)-(a.openedAt||0)):[];
+  $('readList').innerHTML=read.length?read.map(n=>'<li class="readnote">'+(n.mood?'<span class="small muted">'+esc(moodLabel(n.mood))+'</span>':'')+'<p>'+esc(n.text)+'</p></li>').join(''):'<li class="small muted">No notes read yet.</li>';
+}
+$('moodPick').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-mood]');if(!b)return;
+  if(needMe()||!requireDb())return;
+  const mood=b.dataset.mood,all=S.jar.filter(n=>n.by===partner());
+  const fit=all.filter(n=>n.mood===mood||!n.mood);
+  const pool=fit.length?fit:all;if(!pool.length)return;
+  const unread=pool.filter(n=>!n.opened);
+  const from=unread.length?unread:pool;
+  const n=from[Math.floor(Math.random()*from.length)];
+  const box=$('picked');box.hidden=false;
+  const note=fit.length?'':'<span class="mood">No note for this feeling yet, so here is another one</span>';
+  box.innerHTML='<div class="note pop">'+(note||(n.mood?'<span class="mood">For when you think “'+esc(moodLabel(n.mood))+'”</span>':''))+esc(n.text)+'<div class="meta">From '+esc(nameOf(n.by))+'</div></div>';
+  if(!n.opened){try{await db.doc('jar/'+n.id).update({opened:true,openedAt:Date.now()})}catch(er){writeErr(er)}}
+});
+$('addNote').addEventListener('click',async()=>{
+  const t=$('noteText').value.trim();if(!t)return;
+  if(needMe()||!requireDb())return;
+  $('addNote').disabled=true;
+  try{await db.collection('jar').add({text:t,mood:writeMood,by:S.me,at:Date.now(),opened:false});$('noteText').value='';$('noteLeft').textContent='240 left';toast('Folded and in the jar for “'+moodLabel(writeMood)+'”')}catch(e){writeErr(e)}
+  $('addNote').disabled=false;
+});
+
+/* ---------- bucket list ---------- */
+function renderBucket(){
+  const all=S.bucket.slice().sort((a,b)=>(a.done-b.done)||(b.at-a.at));
+  const list=all.filter(i=>S.filter==='all'||(S.filter==='done'?i.done:!i.done));
+  const done=S.bucket.filter(i=>i.done).length;
+  $('bucketStat').textContent=S.bucket.length?done+' of '+S.bucket.length+' done':'';
+  $('bucketList').innerHTML=list.length?list.map(i=>'<li class="bitem'+(i.done?' done':'')+'" data-id="'+esc(i.id)+'"><input type="checkbox" id="b-'+esc(i.id)+'" '+(i.done?'checked':'')+' aria-label="Done"><label for="b-'+esc(i.id)+'"><span class="txt">'+esc(i.text)+'</span><span class="by"><span class="dot '+(i.by==='mx'?'mx':'nl')+'"></span>'+esc(nameOf(i.by))+(i.done&&i.doneAt?' · done '+esc(fmt(myZone(),new Date(i.doneAt),{day:'numeric',month:'short',year:'numeric'})):'')+'</span></label><button class="btn ghost small" type="button" data-del>Remove</button></li>').join('')
+    :'<li class="empty">'+(S.filter==='done'?'Nothing ticked off yet. Soon!':S.bucket.length?'Everything is done. Add more plans!':'Add the first thing you want to do together.')+'</li>';
+}
+$('bucketForm').addEventListener('submit',async e=>{
+  e.preventDefault();const t=$('bucketText').value.trim();if(!t)return;
+  if(needMe()||!requireDb())return;
+  $('bucketText').value='';
+  try{await db.collection('bucket').add({text:t,by:S.me,done:false,at:Date.now()})}catch(er){writeErr(er);$('bucketText').value=t}
+});
+document.querySelector('.seg').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;S.filter=b.dataset.f;document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderBucket()});
+$('bucketList').addEventListener('change',async e=>{
+  const li=e.target.closest('[data-id]');if(!li||!requireDb())return;
+  const done=e.target.checked;
+  try{await db.doc('bucket/'+li.dataset.id).update({done,doneAt:done?Date.now():null})}catch(er){writeErr(er)}
+});
+$('bucketList').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-del]');if(!b)return;
+  if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){b.dataset.armed='';b.textContent='Remove'}},3000);return}
+  if(!requireDb())return;
+  try{await db.doc('bucket/'+b.closest('[data-id]').dataset.id).delete()}catch(er){writeErr(er)}
+});
+
+/* ---------- play ---------- */
+const GAMES=[
+  ['Draw and guess',[
+    ['Gartic Phone','🎨','https://garticphone.com','Telephone with drawings. Chaotic and very funny with two.'],
+    ['skribbl.io','✏️','https://skribbl.io','One draws, the other guesses. Make a private room.'],
+  ]],
+  ['Board and word games',[
+    ['Board Game Arena','🎲','https://boardgamearena.com','Hundreds of real board games in the browser, many made for two.'],
+    ['Codenames','🕵️','https://codenames.game','The word-association classic. Play as one team, or use Duet mode.'],
+    ['Tanggle','🧩','https://tanggle.io','Online jigsaw puzzles you solve together in real time.'],
+    ['Chess.com','♟️','https://www.chess.com','Play a game, or send each other one move a day.'],
+    ['GeoGuessr','🌍','https://www.geoguessr.com','Guess where in the world you are. Try to land on each other’s city.'],
+  ]],
+  ['Watch and listen together',[
+    ['Teleparty','🍿','https://www.teleparty.com','Watch Netflix, Disney+ and more in sync with a chat.'],
+    ['Spotify Jam','🎧','https://www.spotify.com','Start a Jam and both add songs to the same queue.'],
+  ]],
+  ['Talk and get closer',[
+    ['Paired','💬','https://www.paired.com','A daily question and quiz for couples, answered separately and revealed together.'],
+  ]],
+];
+$('gameGroups').innerHTML=GAMES.map(([g,items])=>'<div style="display:grid;gap:10px"><h3>'+esc(g)+'</h3><div class="games">'+items.map(([n,ic,u,d])=>'<a class="game" href="'+u+'" target="_blank" rel="noopener"><b><span class="pic" aria-hidden="true">'+ic+'</span> '+esc(n)+'</b><span>'+esc(d)+'</span></a>').join('')+'</div></div>').join('');
+const QS=['What is a small thing I do that makes you feel loved?','Which day from our time together would you live again?','What is the first thing you want to eat when we are together?','What did you dream about last night?','If we could teleport for one hour right now, where would we go?','What song reminds you of me, and why?','What are you looking forward to this week?','What is something you have never told me about your childhood?','Where do you see us living in five years?','What was the best part of your day, and the hardest?','What would your perfect lazy Sunday with me look like?','Which habit of mine would you miss if it disappeared?','What is something new you would like us to try together?','What made you laugh today?','What is a place in your city you want to show me?','How can I support you better from far away?','What is a word in your language you wish I used more?','What would we name our dog?','What did you think of me the first time we met?','What is one goal you want us to reach before the end of the year?','If we wrote a book about us, what would chapter one be called?','Which tradition from your family do you want to keep with me?','What is a fear you have about the distance, and what helps?','What should our next date night over video be?','Which of my friends would you want to meet first?','What is your favourite memory of us so far?','What is something you are proud of this month?','Which smell reminds you of me?','What would you cook for me on our first night together?','What is one thing on your mind that you have not said yet?','If you could relive one day of your life, which one?','What is your love language, and has it changed?','What is a movie we should watch together next?','What made you feel close to me this week?','What is the most random thing you learned recently?','Where would you take me on a surprise trip?','What do you do when you miss me most?','What is a small ritual we could do every day, even far apart?','What is something about my country you are curious about?','What part of your routine do you wish I could join?','Which outfit of mine is your favourite?','What is a compliment you got that you still remember?','What would our perfect home look like?','What is something you want to get better at next year?','What is the funniest misunderstanding we ever had?','What do you want our first morning together to look like?','Which song would be on the soundtrack of our relationship?','What scares you a little about the future, and what excites you?','What was your first impression of my family or friends?','What is a dish from my country you want to learn to make?','What would you tell your younger self about love?','When did you first know you liked me?','What is one thing I could do tomorrow to make your day better?','What is your favourite photo of us, and why?','What is a dream you have never said out loud?','What would you do if we had one free day in Amsterdam?','What would you do if we had one free day in Mexico?','What is something small that always cheers you up?','What tradition do you want us to start?'];
+function dailyKey(){return dayKey(zoneOf('mx'))}
+function dailyQ(k){const n=Math.round(keyToDate(k).getTime()/86400000);return QS[((n*17)%QS.length+QS.length)%QS.length]}
+let qi=Math.floor(Math.random()*QS.length);
+function showQ(){$('question').textContent=QS[qi%QS.length]}
+$('nextQ').addEventListener('click',()=>{qi++;showQ()});showQ();
+function renderLinks(){
+  const ls=S.links.slice().sort((a,b)=>a.at-b.at);
+  $('linkList').innerHTML=ls.length?ls.map(l=>'<li class="row" data-id="'+esc(l.id)+'" style="justify-content:space-between"><a href="'+esc(l.url)+'" target="_blank" rel="noopener" style="color:inherit;min-width:0;overflow-wrap:anywhere"><span class="dot '+(l.by==='mx'?'mx':'nl')+'"></span> '+esc(l.title)+'</a><button class="btn ghost small" type="button" data-del>Remove</button></li>').join(''):'<li class="small muted">Add your favourite game, playlist or video call link so it is always one tap away.</li>';
+}
+$('linkForm').addEventListener('submit',async e=>{
+  e.preventDefault();let u=$('linkUrl').value.trim(),t=$('linkTitle').value.trim();
+  if(!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;
+  try{new URL(u)}catch(er){toast('That link does not look right.');return}
+  if(needMe()||!requireDb())return;
+  try{await db.collection('links').add({title:t||u.replace(/^https?:\/\//,''),url:u,by:S.me,at:Date.now()});$('linkUrl').value='';$('linkTitle').value=''}catch(er){writeErr(er)}
+});
+$('linkList').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-del]');if(!b)return;
+  if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Sure?';return}
+  if(!requireDb())return;
+  try{await db.doc('links/'+b.closest('[data-id]').dataset.id).delete()}catch(er){writeErr(er)}
+});
+
+/* ---------- daily question ---------- */
+S.daily=[];S.dailyEditing=false;let dailyShownKey='';
+function dailyDoc(k,side){return S.daily.find(d=>d.date===k&&d.side===side)}
+function ansBlock(side,text,locked){return '<div class="ans '+side+(locked?' locked':'')+'"><b><span class="dot '+side+'"></span>'+esc(nameOf(side))+'</b><p>'+esc(text)+'</p></div>'}
+function renderDaily(){
+  const k=dailyKey();dailyShownKey=k;
+  const mineD=S.me&&dailyDoc(k,S.me),theirs=S.me&&dailyDoc(k,partner());
+  $('dailyQ').textContent=(mineD&&mineD.q)||(theirs&&theirs.q)||dailyQ(k);
+  $('dailyDate').textContent=fmt('UTC',keyToDate(k),{weekday:'short',day:'numeric',month:'short'});
+  const ask=!S.me?false:(!mineD||S.dailyEditing);
+  $('dailyAsk').hidden=!ask;$('dailyCancel').hidden=!S.dailyEditing;
+  $('dailySend').textContent=S.dailyEditing?'Save my answer':'Lock in my answer';
+  $('dailyHint').textContent=!S.me?'':theirs?nameOf(partner())+' already answered. Answer to see it.':nameOf(partner())+" hasn't answered yet.";
+  let out='';
+  if(!S.me)out='<div class="small muted">Pick who you are to answer.</div>';
+  else if(mineD&&!S.dailyEditing){
+    if(theirs)out='<div class="answers">'+ansBlock(partner(),theirs.text)+ansBlock(S.me,mineD.text)+'</div>';
+    else out='<div class="small muted">Your answer is locked in. It unlocks as soon as '+esc(nameOf(partner()))+' answers too.</div><div class="answers">'+ansBlock(S.me,mineD.text)+ansBlock(partner(),'Waiting for an answer to appear here.',true)+'</div>';
+    out+='<div class="row"><button class="btn ghost small" type="button" id="dailyEdit">Edit my answer</button></div>';
+  }
+  $('dailyOut').innerHTML=out;
+  const e=$('dailyEdit');if(e)e.addEventListener('click',()=>{S.dailyEditing=true;$('dailyText').value=mineD.text;renderDaily();$('dailyText').focus()});
+  const byDate={};S.daily.forEach(d=>{if(d.date!==k)(byDate[d.date]=byDate[d.date]||{})[d.side]=d});
+  const past=Object.keys(byDate).filter(x=>byDate[x].nl&&byDate[x].mx).sort().reverse().slice(0,30);
+  $('dailyPast').hidden=!past.length;
+  $('dailyPastList').innerHTML=past.map(x=>'<div class="past"><div class="small muted">'+esc(fmt('UTC',keyToDate(x),{weekday:'long',day:'numeric',month:'long'}))+'</div><b>'+esc(byDate[x].nl.q||dailyQ(x))+'</b><div class="answers">'+ansBlock('nl',byDate[x].nl.text)+ansBlock('mx',byDate[x].mx.text)+'</div></div>').join('');
+}
+$('dailySend').addEventListener('click',async()=>{
+  const t=$('dailyText').value.trim();if(!t){toast('Write an answer first.');return}
+  if(needMe()||!requireDb())return;
+  const k=dailyKey();$('dailySend').disabled=true;
+  try{await db.doc('daily/'+k+'_'+S.me).set({date:k,side:S.me,q:$('dailyQ').textContent,text:t,at:Date.now()});S.dailyEditing=false;$('dailyText').value='';
+    toast(dailyDoc(k,partner())?'Unlocked! Read '+nameOf(partner())+"'s answer":'Locked in. You will see '+nameOf(partner())+"'s answer once they reply")}
+  catch(e){writeErr(e)}
+  $('dailySend').disabled=false;renderDaily();
+});
+$('dailyCancel').addEventListener('click',()=>{S.dailyEditing=false;$('dailyText').value='';renderDaily()});
+
+/* ---------- sealed letters ---------- */
+S.sealed=[];
+const ENV='<svg viewBox="0 0 76 52" aria-hidden="true"><rect x="1" y="1" width="74" height="50" rx="4" style="fill:var(--paper);stroke:var(--glass-line);stroke-width:1.5"/><path d="M2 3l36 26 36-26" style="fill:none;stroke:var(--glass-line);stroke-width:1.5"/><circle cx="38" cy="29" r="7" style="fill:var(--heart)"/><path d="M38 33l-3-3c-1.2-1.2-.4-3 1-3 .9 0 1.6.6 2 1.2.4-.6 1.1-1.2 2-1.2 1.4 0 2.2 1.8 1 3z" style="fill:#fff"/></svg>';
+function targetInstant(){const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(S.settings.target||'');return m?wallToInstant(myZone(),+m[1],+m[2],+m[3],+m[4],+m[5]):Infinity}
+function letterOpenable(l,T){return Date.now()>=T&&l.at<T}
+let sealedOpenState='';
+function renderSealed(){
+  const pt=partner(),T=targetInstant(),now=Date.now();
+  const forMe=S.me?S.sealed.filter(l=>l.by===pt):[];
+  const openable=S.me?S.sealed.filter(l=>!l.openedAt&&letterOpenable(l,T)).sort((a,b)=>a.at-b.at):[];
+  const locked=forMe.filter(l=>!l.openedAt&&!letterOpenable(l,T));
+  const opened=S.me?S.sealed.filter(l=>l.openedAt).sort((a,b)=>a.at-b.at):[];
+  const mineAll=S.me?S.sealed.filter(l=>l.by===S.me):[];
+  const lastMine=mineAll.reduce((m,l)=>Math.max(m,l.at),0);
+  const days=Math.max(0,Math.ceil((T-now)/86400000));
+  let h='';
+  if(!S.me)h='<p class="small muted" style="margin:0">Pick who you are to see your letters.</p>';
+  else{
+    if(openable.length)h+='<p style="margin:0"><b>You\'re together!</b> Sit side by side and take turns opening your letters, one at a time.</p><div class="envs">'+openable.map(l=>'<button class="env" type="button" data-open-letter="'+esc(l.id)+'">'+ENV+'<span>from '+esc(nameOf(l.by))+'</span></button>').join('')+'</div>';
+    if(locked.length)h+='<p style="margin:0">'+esc(nameOf(pt))+' sealed '+locked.length+(locked.length===1?' letter':' letters')+' for you. '+(isFinite(T)&&T>now?'They open in '+days+(days===1?' day':' days')+', when the countdown hits zero.':'They open at your next countdown.')+'</p><div class="envs">'+locked.map(()=>'<button class="env" type="button" disabled aria-label="Sealed letter">'+ENV+'<span>sealed</span></button>').join('')+'</div>';
+    if(!openable.length&&!locked.length)h+='<p class="small muted" style="margin:0">A time capsule for the day you meet. Write longer letters over the weeks; nobody can open them until the countdown ends, and then you open them together.</p>';
+    if(isFinite(T)&&T>now&&(!lastMine||now-lastMine>7*86400000))h+='<p class="small" style="margin:0;color:var(--heart)">'+(lastMine?'It\'s been a week since your last letter. Add one to the time capsule?':'You haven\'t sealed a letter yet. Write the first one below.')+'</p>';
+    h+='<div id="letterView"></div>';
+    if(opened.length)h+='<details><summary class="muted small">Letters you\'ve opened together ('+opened.length+')</summary><ul class="list" style="margin-top:12px">'+opened.map(l=>'<li class="readnote"><p>'+esc(l.text)+'</p><span class="small muted">From '+esc(nameOf(l.by))+' · sealed '+esc(fmt(myZone(),new Date(l.at),{day:'numeric',month:'short',year:'numeric'}))+' · opened '+esc(fmt(myZone(),new Date(l.openedAt),{day:'numeric',month:'short',year:'numeric'}))+'</span></li>').join('')+'</ul></details>';
+  }
+  const key=h;if(key!==sealedOpenState){const lv=$('letterView')&&$('letterView').innerHTML;$('sealedBody').innerHTML=h;sealedOpenState=key;if(lv&&$('letterView'))$('letterView').innerHTML=lv}
+  $('sealedSum').textContent='Write a sealed letter for '+nameOf(pt);
+  $('sealedWrite').hidden=!S.me;
+  const mine=S.me?S.sealed.filter(l=>l.by===S.me&&!l.openedAt).sort((a,b)=>a.at-b.at):[];
+  $('mySealed').innerHTML=mine.length?'<div class="small muted" style="margin-bottom:4px">Waiting to be opened by '+esc(nameOf(pt))+'</div>'+mine.map(l=>'<div class="mine-sealed" data-id="'+esc(l.id)+'"><span>'+esc(l.text.length>90?l.text.slice(0,90)+'…':l.text)+'</span><button class="btn ghost small" type="button" data-del-letter>Remove</button></div>').join(''):'';
+}
+$('sealedBody').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-open-letter]');if(!b)return;
+  const l=S.sealed.find(x=>x.id===b.dataset.openLetter);if(!l||!requireDb())return;
+  $('letterView').innerHTML='<div class="note pop">'+esc(l.text)+'<div class="meta">From '+esc(nameOf(l.by))+', sealed '+esc(fmt(myZone(),new Date(l.at),{weekday:'long',day:'numeric',month:'long'}))+'</div></div>';
+  burst();
+  try{await db.doc('sealed/'+l.id).update({openedAt:Date.now()})}catch(er){writeErr(er)}
+});
+$('addSealed').addEventListener('click',async()=>{
+  const t=$('sealedText').value.trim();if(!t)return;
+  if(needMe()||!requireDb())return;
+  $('addSealed').disabled=true;
+  try{await db.collection('sealed').add({text:t,by:S.me,at:Date.now()});$('sealedText').value='';toast('Sealed. '+nameOf(partner())+' can open it when you meet')}catch(e){writeErr(e)}
+  $('addSealed').disabled=false;
+});
+$('mySealed').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-del-letter]');if(!b)return;
+  if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Sure?';return}
+  if(!requireDb())return;
+  try{await db.doc('sealed/'+b.closest('[data-id]').dataset.id).delete()}catch(er){writeErr(er)}
+});
+
+/* ---------- treats ---------- */
+S.profiles={};
+const DELIVERY={
+  nl:[['Thuisbezorgd','https://www.thuisbezorgd.nl'],['Uber Eats','https://www.ubereats.com/nl-en'],['Too Good To Go','https://www.toogoodtogo.com']],
+  mx:[['Uber Eats','https://www.ubereats.com/mx-en'],['Rappi','https://www.rappi.com.mx'],['DiDi Food','https://web.didiglobal.com/mx/food/']]
+};
+function renderTreat(){
+  const pt=partner(),pr=S.profiles[pt]||{},me=S.me&&S.profiles[S.me]||{};
+  const addr=pr.address||'';
+  let h='<p class="small muted" style="margin:0">Open a delivery app, set the delivery address to '+esc(nameOf(pt))+'\'s, and pay with your own account. Delivery apps let you order to any address in that country.</p>';
+  h+='<div class="ans '+pt+'"><b><span class="dot '+pt+'"></span>'+esc(nameOf(pt))+'\'s address</b><p>'+(addr?esc(addr):'<span class="muted">Not added yet. Ask '+esc(nameOf(pt))+' to fill in their delivery details below.</span>')+'</p>'+(pr.favs?'<b style="margin-top:6px">Loves</b><p>'+esc(pr.favs)+'</p>':'')+'</div>';
+  h+='<div class="row">'+(addr?'<button class="btn" type="button" id="copyAddr">Copy address</button>':'')+DELIVERY[pt].map(([n,u])=>'<a class="btn" href="'+u+'" target="_blank" rel="noopener">'+esc(n)+'</a>').join('')+'</div>';
+  $('treatBody').innerHTML=h;
+  const cb=$('copyAddr');if(cb)cb.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(addr);toast('Address copied')}catch(e){const r=document.createRange();r.selectNodeContents($('treatBody').querySelector('.ans p'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast('Address selected, copy it from here')}});
+  const a=document.activeElement;
+  if(a!==$('myAddr')&&a!==$('myFavs')&&!$('myTreat').dataset.dirty){$('myAddr').value=me.address||'';$('myFavs').value=me.favs||''}
+  $('myTreat').hidden=!S.me;
+  if(S.me&&!me.address&&!$('myTreat').dataset.auto){$('myTreat').open=true;$('myTreat').dataset.auto='1'}
+}
+['myAddr','myFavs'].forEach(id=>$(id).addEventListener('input',()=>{$('myTreat').dataset.dirty='1'}));
+$('saveTreat').addEventListener('click',async()=>{
+  if(needMe()||!requireDb())return;
+  const doc={address:$('myAddr').value.trim(),favs:$('myFavs').value.trim(),at:Date.now()};
+  try{await db.doc('profile/'+S.me).set(doc);delete $('myTreat').dataset.dirty;toast('Saved. '+nameOf(partner())+' can now send you treats')}catch(e){writeErr(e)}
+});
+
+/* ---------- home & all ---------- */
+function renderHome(){
+  document.querySelectorAll('[data-name]').forEach(el=>el.textContent=nameOf(el.dataset.name));
+  $('mePill').innerHTML=S.me?'<b>'+esc(nameOf(S.me))+'</b> · log out':'';
+}
+function renderAll(){fillSettingsForm();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
+
+/* ---------- shared data (Supabase) ---------- */
+function makeDb(sb){
+  const rowsByPath=new Map(),listeners=new Set();
+  const split=p=>{const i=p.lastIndexOf('/');return [p.slice(0,i),p.slice(i+1)]};
+  const snapDoc=path=>{const r=rowsByPath.get(path);return {id:split(path)[1],exists:!!r,data:()=>r?r.data:undefined}};
+  const snapCol=(col,o)=>{let docs=[];rowsByPath.forEach(r=>{if(r.col===col)docs.push({id:r.id,exists:true,data:()=>r.data})});
+    if(o.order){const [f,dir]=o.order;docs.sort((a,b)=>{const x=a.data()[f],y=b.data()[f];return (x>y?1:x<y?-1:0)*(dir==='desc'?-1:1)})}
+    if(o.limit)docs=docs.slice(0,o.limit);return {docs,size:docs.length,empty:!docs.length}};
+  const fire=(col,path)=>listeners.forEach(l=>{if(l.type==='col'&&l.key===col)l.cb(snapCol(col,l.o));else if(l.type==='doc'&&l.key===path)l.cb(snapDoc(path))});
+  const apply=row=>{rowsByPath.set(row.path,{col:row.col,id:row.id,data:row.data});fire(row.col,row.path)};
+  const drop=path=>{const r=rowsByPath.get(path);if(!r)return;rowsByPath.delete(path);fire(r.col,path)};
+  const fail=e=>({code:/row-level|permission/i.test(e.message||'')?'invalid_argument':'unavailable',message:e.message});
+  async function write(path,data){const [col,id]=split(path);apply({path,col,id,data});
+    const {error}=await sb.from('docs').upsert({path,col,id,data,updated_at:new Date().toISOString()});if(error)throw fail(error)}
+  const newId=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)).replace(/-/g,'').slice(0,20);
+  function doc(path){return {id:split(path)[1],path,
+    get:async()=>snapDoc(path),
+    set:d=>write(path,JSON.parse(JSON.stringify(d))),
+    update:d=>{const r=rowsByPath.get(path);if(!r)return Promise.reject({code:'invalid_argument',message:'missing'});return write(path,Object.assign({},r.data,JSON.parse(JSON.stringify(d))))},
+    delete:async()=>{drop(path);const {error}=await sb.from('docs').delete().eq('path',path);if(error)throw fail(error)},
+    onSnapshot:cb=>{const l={type:'doc',key:path,cb};listeners.add(l);setTimeout(()=>cb(snapDoc(path)));return ()=>listeners.delete(l)}}}
+  function query(col,o){return {
+    orderBy:(f,dir)=>query(col,Object.assign({},o,{order:[f,dir||'asc']})),
+    limit:n=>query(col,Object.assign({},o,{limit:n})),
+    get:async()=>snapCol(col,o),
+    onSnapshot:cb=>{const l={type:'col',key:col,o,cb};listeners.add(l);setTimeout(()=>cb(snapCol(col,o)));return ()=>listeners.delete(l)},
+    doc:id=>doc(col+'/'+(id||newId())),
+    add:async d=>{const r=doc(col+'/'+newId());await r.set(d);return r}}}
+  async function load(){const all=[];for(let from=0;;from+=1000){const {data,error}=await sb.from('docs').select('path,col,id,data').range(from,from+999);if(error)throw error;all.push(...data);if(data.length<1000)break}
+    rowsByPath.clear();all.forEach(r=>rowsByPath.set(r.path,{col:r.col,id:r.id,data:r.data}));
+    listeners.forEach(l=>l.type==='col'?l.cb(snapCol(l.key,l.o)):l.cb(snapDoc(l.key)))}
+  sb.channel('docs-live').on('postgres_changes',{event:'*',schema:'public',table:'docs'},p=>{if(p.eventType==='DELETE'){if(p.old&&p.old.path)drop(p.old.path)}else if(p.new&&p.new.path)apply(p.new)}).subscribe();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load().catch(()=>{})});
+  return {doc,collection:c=>query(c,{}),load};
+}
+
+/* ---------- login ---------- */
+function loginMsg(t,bad){$('loginMsg').textContent=t;$('loginMsg').style.color=bad?'var(--heart)':'var(--muted)'}
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('loginBtn').disabled=true;loginMsg('Logging in…');
+  const {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPw').value});
+  $('loginBtn').disabled=false;
+  if(error){loginMsg(/confirm/i.test(error.message)?'Confirm your email first: tap the link in the email we sent you, then log in here.':'That email and password don\'t match. First time here? Tap "Create your password".',true);return}
+  start(data.session);
+});
+$('signupBtn').addEventListener('click',async()=>{
+  const email=$('loginEmail').value.trim(),pw=$('loginPw').value;
+  if(!email||pw.length<6){loginMsg('Fill in your email and a password of at least 6 characters, then tap this again.',true);return}
+  loginMsg('Creating your account…');
+  const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.href.split('#')[0]}});
+  if(error){loginMsg(/registered/i.test(error.message)?'You already have an account. Use Log in.':error.message,true);return}
+  if(data.session)return start(data.session);
+  loginMsg('Almost there. Open the email we just sent and tap the confirmation link. Then come back here and log in.');
+});
+
+/* ---------- boot ---------- */
+const rows=snap=>snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+let started=false;
+async function start(session){
+  if(started||!session)return;
+  const email=(session.user.email||'').toLowerCase();
+  const {data:members,error}=await sb.from('members').select('email,side');
+  const me=(members||[]).find(m=>m.email.toLowerCase()===email);
+  if(error||!me){await sb.auth.signOut();$('login').hidden=false;loginMsg('This email isn\'t on the list for this app. Use the email Claude set up for you.',true);return}
+  started=true;S.me=me.side;$('login').hidden=true;
+  db=makeDb(sb);
+  try{await db.load()}catch(e){console.warn(e);toast('Could not load your data. Check your connection.')}
+  db.doc('app/settings').onSnapshot(s=>{if(s.exists){const d=s.data();const dc=d.cities||{};S.settings={target:d.target||S.settings.target,mxzone:d.mxzone||S.settings.mxzone,names:Object.assign({nl:'',mx:''},d.names||{}),cities:{nl:Object.assign({name:''},dc.nl||{}),mx:Object.assign({name:''},dc.mx||{})}}}renderAll();refreshWeather()});
+  db.collection('bucket').onSnapshot(s=>{S.bucket=rows(s);renderBucket()});
+  db.collection('jar').onSnapshot(s=>{S.jar=rows(s);renderJar()});
+  db.collection('daily').orderBy('at','desc').limit(200).onSnapshot(s=>{S.daily=rows(s);renderDaily()});
+  db.collection('profile').onSnapshot(s=>{s.docs.forEach(d=>{S.profiles[d.id]=d.data()});renderTreat()});
+  db.collection('sealed').onSnapshot(s=>{S.sealed=rows(s);renderSealed()});
+  db.collection('links').onSnapshot(s=>{S.links=rows(s);renderLinks()});
+  db.collection('taps').onSnapshot(s=>{
+    s.docs.forEach(d=>{S.taps[d.id]=(d.data().log)||[]});
+    let fresh=false;
+    const last=(S.taps[partner()]||[])[0];const seen=+(store.get('hp_seenTap')||0);
+    if(last&&last.at>seen){fresh=true;store.set('hp_seenTap',String(last.at));if(S.loaded.taps||Date.now()-last.at<6*3600e3){burst();toast(nameOf(partner())+': '+kindLabel(last.k))}}
+    S.loaded.taps=true;renderTaps(fresh);
+  });
+  renderAll();refreshWeather();setInterval(refreshWeather,30*60000);
+}
+S.me=null;
+renderAll();showTab();setInterval(tick,1000);setInterval(()=>{renderTaps();renderSealed()},60000);
+const CFG=window.HP_CONFIG||{};
+if(!window.supabase||!CFG.supabaseUrl){$('login').hidden=false;loginMsg('The app is not set up yet.',true)}
+else{
+  sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true}});
+  sb.auth.getSession().then(({data})=>{if(data.session)start(data.session);else $('login').hidden=false});
+  sb.auth.onAuthStateChange((ev,session)=>{if(session&&!started)start(session)});
+}
+})();
+</script>
+</body>
+</html>
