@@ -93,6 +93,20 @@ textarea{resize:vertical;min-height:84px}
 .clock .wx b{font-family:var(--display);font-weight:500;font-size:18px;font-variant-numeric:tabular-nums}
 .clock .wx span{color:var(--muted);font-size:12px}
 
+/* Distance line: two half hearts slide together as the km shrink; --f runs 1 (far) to 0 (together) */
+.dist{display:grid;gap:4px;justify-items:center;--f:1}
+.dist .km{font-family:var(--display);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums}
+.dist .track{position:relative;width:100%;height:36px}
+.dist a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.dist .half{position:absolute;top:0;width:18px;height:36px;transition:left .8s ease,right .8s ease}
+.dist .half.l{right:calc(50% + var(--f) * (50% - 18px));color:var(--nl)}
+.dist .half.r{left:calc(50% + var(--f) * (50% - 18px));color:var(--mx)}
+.dist .line{position:absolute;top:50%;height:0;border-top:2px dashed var(--line);left:calc(50% - var(--f) * (50% - 18px));width:calc(var(--f) * (100% - 36px));transition:all .8s ease}
+.dist .src{text-align:center}
+.dist.together .half{animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.dist .half,.dist .line{transition:none}.dist.together .half{animation:none}}
+
 /* Thinking of you */
 .tou{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
 .heartbtn{width:92px;height:92px;border-radius:50%;border:none;background:var(--heart);color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow);position:relative}
@@ -238,6 +252,15 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
       <div class="big"><span class="days" id="cdDays">0</span><span class="dlabel" id="cdLabel">days to go</span></div>
       <div class="exact" id="cdExact"></div>
       <div class="small muted" id="cdTarget"></div>
+      <div class="dist" id="dist">
+        <span class="km" id="distKm">…</span>
+        <div class="track" aria-hidden="true">
+          <svg class="half l" viewBox="2 2 10 20" preserveAspectRatio="xMaxYMid meet"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span class="line"></span>
+          <svg class="half r" viewBox="12 2 10 20" preserveAspectRatio="xMinYMid meet"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <span class="small muted src" id="distSrc"></span>
+      </div>
       <div class="clocks">
         <div class="clock nl"><span class="who"><span class="dot nl"></span><span data-name="nl"></span></span><span class="time" id="clkNl">--:--</span><span class="hint" id="hintNl"></span><span class="wx" id="wxNl"></span></div>
         <div class="clock mx"><span class="who"><span class="dot mx"></span><span data-name="mx"></span></span><span class="time" id="clkMx">--:--</span><span class="hint" id="hintMx"></span><span class="wx" id="wxMx"></span></div>
@@ -399,7 +422,7 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 const S={
   settings:{target:'2026-12-24T00:00',mxzone:'America/Mexico_City',names:{nl:'',mx:''},cities:{nl:{name:'Volkel'},mx:{name:'Tijuana'}}},
   weather:{},
-  me:null, bucket:[], jar:[], taps:{nl:[],mx:[]}, photos:[], links:[],
+  me:null, loc:{}, bucket:[], jar:[], taps:{nl:[],mx:[]}, photos:[], links:[],
   filter:'todo', day:null, blobs:{}, loaded:{taps:false}
 };
 let db=null, sb=null;
@@ -500,7 +523,7 @@ let wxBusy=false,cityFixing=false;
 async function refreshWeather(){
   if(wxBusy)return;wxBusy=true;
   try{
-    if(db&&!cityFixing&&['nl','mx'].some(sd=>S.settings.cities[sd].name&&S.settings.cities[sd].lat==null)){
+    if(db&&S.loaded.settings&&!cityFixing&&['nl','mx'].some(sd=>S.settings.cities[sd].name&&S.settings.cities[sd].lat==null)){
       cityFixing=true;const cities=JSON.parse(JSON.stringify(S.settings.cities));
       for(const sd of ['nl','mx'])if(cities[sd].name&&cities[sd].lat==null){const k=await findCity(cities[sd].name,sd);if(k)cities[sd]=k}
       S.settings.cities=cities;await saveSettings();cityFixing=false;
@@ -548,6 +571,46 @@ function tick(){
   else $('cdExact').innerHTML='<span>Reached</span>';
   $('cdTarget').textContent='Until '+fmt(z,new Date(inst),{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+' your time';
 }
+
+/* ---------- distance ---------- */
+// Each side's spot: a live location shared from the app (loc/<side>, at most a week old), otherwise the home city from settings.
+const LOC_MAX_AGE=7*864e5;
+function spotOf(sd){
+  const l=S.loc[sd];if(l&&l.lat!=null&&Date.now()-l.at<LOC_MAX_AGE)return {lat:l.lat,lon:l.lon,live:true};
+  const c=S.settings.cities[sd];return c&&c.lat!=null?{lat:c.lat,lon:c.lon,live:false,name:c.name}:null}
+function kmBetween(a,b){const R=6371,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;
+  const h=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function renderDistance(){
+  const a=spotOf('nl'),b=spotOf('mx'),box=$('dist');
+  if(!a||!b){box.style.setProperty('--f',1);box.classList.remove('together');$('distKm').textContent='… km apart';$('distSrc').innerHTML=locLink();return}
+  const km=kmBetween(a,b),together=km<0.5;
+  box.style.setProperty('--f',together?0:Math.min(1,Math.max(.08,Math.log10(1+km)/Math.log10(1+10000))));
+  box.classList.toggle('together',together);
+  $('distKm').textContent=together?'Together':(km<10?km.toFixed(1):Math.round(km).toLocaleString('en-US'))+' km apart';
+  const where=sd=>{const p=spotOf(sd);return esc(nameOf(sd))+' '+(p.live?'(live)':'in '+esc(p.name||'home'))};
+  $('distSrc').innerHTML=where('nl')+' · '+where('mx')+'<br>'+locLink();
+}
+const sharing=()=>store.get('hp_shareLoc')==='1';
+const locLink=()=>!S.me||!navigator.geolocation?'':sharing()?'Sharing your location while the app is open · <a href="#" id="locStop">stop</a>':'<a href="#" id="locStart">Share my location</a> so the km update when you travel';
+$('dist').addEventListener('click',e=>{
+  if(e.target.id==='locStart'){e.preventDefault();store.set('hp_shareLoc','1');sendLoc(true)}
+  if(e.target.id==='locStop'){e.preventDefault();store.set('hp_shareLoc','0');if(db&&S.me)db.doc('loc/'+S.me).delete().catch(()=>{});renderDistance()}
+});
+let locBusy=false;
+function sendLoc(asked){
+  if(!sharing()||!db||!S.me||locBusy||!navigator.geolocation)return renderDistance();
+  locBusy=true;
+  navigator.geolocation.getCurrentPosition(pos=>{locBusy=false;
+    const lat=+pos.coords.latitude.toFixed(3),lon=+pos.coords.longitude.toFixed(3),old=S.loc[S.me];
+    // Skip the write when nothing moved and the last one is recent, so an open app doesn't churn the db.
+    if(old&&kmBetween(old,{lat,lon})<0.2&&Date.now()-old.at<30*60e3)return renderDistance();
+    db.doc('loc/'+S.me).set({lat,lon,at:Date.now()}).catch(()=>{});
+  },err=>{locBusy=false;
+    if(err.code===1){store.set('hp_shareLoc','0');if(asked)toast('Location is blocked for this app. Allow it in your phone settings to share.')}
+    renderDistance();
+  },{enableHighAccuracy:false,maximumAge:60e3,timeout:20e3});
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)sendLoc()});
 
 /* ---------- thinking of you ---------- */
 const KINDS=[['think','Thinking of you'],['miss','Missing you'],['morning','Good morning'],['night','Good night'],['hug','Sending a hug'],['proud','Proud of you'],['call','Call me?']];
@@ -827,7 +890,7 @@ function renderHome(){
   document.querySelectorAll('[data-name]').forEach(el=>el.textContent=nameOf(el.dataset.name));
   $('mePill').innerHTML=S.me?'<b>'+esc(nameOf(S.me))+'</b> · log out':'';
 }
-function renderAll(){fillSettingsForm();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
+function renderAll(){fillSettingsForm();renderDistance();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
 
 /* ---------- shared data (Supabase) ---------- */
 function makeDb(sb){
@@ -889,20 +952,24 @@ $('signupBtn').addEventListener('click',async()=>{
 /* ---------- boot ---------- */
 const rows=snap=>snap.docs.map(d=>Object.assign({id:d.id},d.data()));
 let started=false;
+let starting=false;
 async function start(session){
-  if(started||!session)return;
+  // getSession and onAuthStateChange both fire on load; only the first call may run.
+  if(started||starting||!session)return;
+  starting=true;
   const email=(session.user.email||'').toLowerCase();
   const {data:members,error}=await sb.from('members').select('email,side');
   const me=(members||[]).find(m=>m.email.toLowerCase()===email);
-  if(error||!me){await sb.auth.signOut();$('login').hidden=false;loginMsg('This email isn\'t on the list for this app. Use the email Claude set up for you.',true);return}
+  if(error||!me){starting=false;await sb.auth.signOut();$('login').hidden=false;loginMsg('This email isn\'t on the list for this app. Use the email Claude set up for you.',true);return}
   started=true;S.me=me.side;$('login').hidden=true;
   db=makeDb(sb);
   try{await db.load()}catch(e){console.warn(e);toast('Could not load your data. Check your connection.')}
-  db.doc('app/settings').onSnapshot(s=>{if(s.exists){const d=s.data();const dc=d.cities||{};S.settings={target:d.target||S.settings.target,mxzone:d.mxzone||S.settings.mxzone,names:Object.assign({nl:'',mx:''},d.names||{}),cities:{nl:Object.assign({name:''},dc.nl||{}),mx:Object.assign({name:''},dc.mx||{})}}}renderAll();refreshWeather()});
+  db.doc('app/settings').onSnapshot(s=>{S.loaded.settings=true;if(s.exists){const d=s.data();const dc=d.cities||{};S.settings={target:d.target||S.settings.target,mxzone:d.mxzone||S.settings.mxzone,names:Object.assign({nl:'',mx:''},d.names||{}),cities:{nl:Object.assign({name:''},dc.nl||{}),mx:Object.assign({name:''},dc.mx||{})}}}renderAll();refreshWeather()});
   db.collection('bucket').onSnapshot(s=>{S.bucket=rows(s);renderBucket()});
   db.collection('jar').onSnapshot(s=>{S.jar=rows(s);renderJar()});
   db.collection('daily').orderBy('at','desc').limit(200).onSnapshot(s=>{S.daily=rows(s);renderDaily()});
   db.collection('profile').onSnapshot(s=>{s.docs.forEach(d=>{S.profiles[d.id]=d.data()});renderTreat()});
+  db.collection('loc').onSnapshot(s=>{S.loc={};s.docs.forEach(d=>{S.loc[d.id]=d.data()});renderDistance()});
   db.collection('sealed').onSnapshot(s=>{S.sealed=rows(s);renderSealed()});
   db.collection('links').onSnapshot(s=>{S.links=rows(s);renderLinks()});
   db.collection('taps').onSnapshot(s=>{
@@ -912,7 +979,7 @@ async function start(session){
     if(last&&last.at>seen){fresh=true;store.set('hp_seenTap',String(last.at));if(S.loaded.taps||Date.now()-last.at<6*3600e3){burst();toast(nameOf(partner())+': '+kindLabel(last.k))}}
     S.loaded.taps=true;renderTaps(fresh);
   });
-  renderAll();refreshWeather();setInterval(refreshWeather,30*60000);
+  renderAll();refreshWeather();setInterval(refreshWeather,30*60000);sendLoc();setInterval(()=>{if(!document.hidden)sendLoc()},5*60000);
 }
 S.me=null;
 renderAll();showTab();setInterval(tick,1000);setInterval(()=>{renderTaps();renderSealed()},60000);
