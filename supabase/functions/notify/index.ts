@@ -1,4 +1,4 @@
-// Edge function "notify": the app calls it right after someone sends a heart, and it pushes a
+// Edge function "notify": the app calls it right after someone sends a heart or answers the daily question, and it pushes a
 // phone notification to the other person's devices. It makes its own push key pair on first use and keeps it
 // in public.push_keys, which only the service role can read; SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are built in.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -40,13 +40,15 @@ Deno.serve(async (req) => {
   const to = me.side === "nl" ? "mx" : "nl";
 
   const keys = await vapid(admin);
-  const { k, action } = await req.json().catch(() => ({}));
+  const { k, action, text, tag } = await req.json().catch(() => ({}));
   // The app asks for the public key before it subscribes a phone.
   if (action === "key") return json({ publicKey: keys.pub });
   webpush.setVapidDetails("mailto:hasta-pronto@example.com", keys.pub, keys.priv);
   const { data: settings } = await admin.from("docs").select("data").eq("path", "app/settings").maybeSingle();
   const name = settings?.data?.names?.[me.side] || (me.side === "nl" ? "Netherlands" : "Mexico");
-  const payload = JSON.stringify({ title: name, body: KINDS[k] || KINDS.think, tag: "tap-" + me.side });
+  // A heart sends its kind; other events (like the daily question) send their own short text.
+  const body = typeof text === "string" && text.trim() ? text.trim().slice(0, 140) : KINDS[k] || KINDS.think;
+  const payload = JSON.stringify({ title: name, body, tag: (typeof tag === "string" ? tag.slice(0, 20) : "tap") + "-" + me.side });
 
   const { data: subs } = await admin.from("docs").select("path,data").eq("col", "push").eq("data->>side", to);
   let sent = 0;

@@ -625,7 +625,7 @@ let pushOn=false;
 function renderPush(){
   const el=$('pushInfo');if(!S.me){el.innerHTML='';return}
   const who=esc(nameOf(partner()));
-  if(pushOn)el.innerHTML='🔔 You get a notification when '+who+' sends one.';
+  if(pushOn)el.innerHTML='🔔 You get a notification when '+who+' sends a heart or answers the question.';
   else if(!pushOk())el.innerHTML=isIOS()&&!standalone()?'🔔 Open the app from your home screen to turn on notifications.':'';
   else if(Notification.permission==='denied')el.innerHTML='🔕 Notifications are blocked. Allow them for this app in your phone settings.';
   else el.innerHTML='<a href="#" id="pushOn">🔔 Get a notification when '+who+' sends one</a>';
@@ -834,8 +834,10 @@ function renderDaily(){
 $('dailySend').addEventListener('click',async()=>{
   const t=$('dailyText').value.trim();if(!t){toast('Write an answer first.');return}
   if(needMe()||!requireDb())return;
-  const k=dailyKey();$('dailySend').disabled=true;
+  const k=dailyKey(),first=!dailyDoc(k,S.me);$('dailySend').disabled=true;
   try{await db.doc('daily/'+k+'_'+S.me).set({date:k,side:S.me,q:$('dailyQ').textContent,text:t,at:Date.now()});S.dailyEditing=false;$('dailyText').value='';
+    // Only the first answer of the day notifies; editing it later stays quiet.
+    if(first)sb.functions.invoke('notify',{body:{tag:'daily',text:dailyDoc(k,partner())?'Answered too! Open the app to read both answers 🔓':"Answered today's question. Your turn ✍️"}}).catch(e=>console.warn('notify',e));
     toast(dailyDoc(k,partner())?'Unlocked! Read '+nameOf(partner())+"'s answer":'Locked in. You will see '+nameOf(partner())+"'s answer once they reply")}
   catch(e){writeErr(e)}
   $('dailySend').disabled=false;renderDaily();
