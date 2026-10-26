@@ -287,6 +287,7 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
           <div class="small muted" id="tapHelp">Tap the heart so they know you're thinking of them, or send something specific.</div>
           <div class="chips" id="tapChips"></div>
           <div class="small muted" id="sentInfo"></div>
+          <div class="small muted" id="pushInfo"></div>
         </div>
       </div>
     </article>
@@ -612,6 +613,39 @@ function sendLoc(asked){
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sendLoc()});
 
+/* ---------- phone notifications (web push) ---------- */
+// The other person's app calls the Supabase "notify" function after a tap; it pushes to every
+// subscription saved here as push/<side>_<hash>. iPhones only allow this from the home-screen app.
+const pushOk=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function b64urlToBytes(s){const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+async function subHash(endpoint){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(endpoint));return [...new Uint8Array(d)].slice(0,8).map(x=>x.toString(16).padStart(2,'0')).join('')}
+let pushOn=false;
+function renderPush(){
+  const el=$('pushInfo');if(!S.me){el.innerHTML='';return}
+  const who=esc(nameOf(partner()));
+  if(pushOn)el.innerHTML='🔔 You get a notification when '+who+' sends one.';
+  else if(!pushOk())el.innerHTML=isIOS()&&!standalone()?'🔔 Open the app from your home screen to turn on notifications.':'';
+  else if(Notification.permission==='denied')el.innerHTML='🔕 Notifications are blocked. Allow them for this app in your phone settings.';
+  else el.innerHTML='<a href="#" id="pushOn">🔔 Get a notification when '+who+' sends one</a>';
+}
+$('pushInfo').addEventListener('click',e=>{if(e.target.id==='pushOn'){e.preventDefault();enablePush(true)}});
+async function enablePush(asked){
+  if(!pushOk()||!db||!S.me)return renderPush();
+  try{
+    if(Notification.permission!=='granted'){if(!asked)return renderPush();if(await Notification.requestPermission()!=='granted')return renderPush()}
+    const reg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){const {data,error}=await sb.functions.invoke('notify',{body:{action:'key'}});if(error||!data||!data.publicKey)throw new Error('the notify function is not set up yet');
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToBytes(data.publicKey)})}
+    const j=sub.toJSON();
+    await db.doc('push/'+S.me+'_'+await subHash(j.endpoint)).set({side:S.me,sub:{endpoint:j.endpoint,keys:j.keys},at:Date.now()});
+    pushOn=true;if(asked)toast('Notifications on');
+  }catch(e){console.warn('push',e);if(asked)toast('Could not turn on notifications: '+(e.message||e))}
+  renderPush();
+}
+
 /* ---------- thinking of you ---------- */
 const KINDS=[['think','Thinking of you'],['miss','Missing you'],['morning','Good morning'],['night','Good night'],['hug','Sending a hug'],['proud','Proud of you'],['call','Call me?']];
 const kindLabel=k=>(KINDS.find(x=>x[0]===k)||KINDS[0])[1];
@@ -624,7 +658,8 @@ async function sendTap(k){
   tapBusy=true;$('heartBtn').disabled=true;
   const log=[{k,at:Date.now()}].concat(S.taps[S.me]||[]).slice(0,60);
   S.taps[S.me]=log;burst();renderTaps();
-  try{await db.doc('taps/'+S.me).set({log});toast('Sent to '+nameOf(partner()))}catch(e){writeErr(e)}
+  try{await db.doc('taps/'+S.me).set({log});toast('Sent to '+nameOf(partner()));
+    sb.functions.invoke('notify',{body:{k}}).catch(e=>console.warn('notify',e))}catch(e){writeErr(e)}
   setTimeout(()=>{tapBusy=false;$('heartBtn').disabled=false},1500);
 }
 function renderTaps(fresh){
@@ -890,7 +925,7 @@ function renderHome(){
   document.querySelectorAll('[data-name]').forEach(el=>el.textContent=nameOf(el.dataset.name));
   $('mePill').innerHTML=S.me?'<b>'+esc(nameOf(S.me))+'</b> · log out':'';
 }
-function renderAll(){fillSettingsForm();renderDistance();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
+function renderAll(){fillSettingsForm();renderDistance();renderPush();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
 
 /* ---------- shared data (Supabase) ---------- */
 function makeDb(sb){
@@ -979,7 +1014,7 @@ async function start(session){
     if(last&&last.at>seen){fresh=true;store.set('hp_seenTap',String(last.at));if(S.loaded.taps||Date.now()-last.at<6*3600e3){burst();toast(nameOf(partner())+': '+kindLabel(last.k))}}
     S.loaded.taps=true;renderTaps(fresh);
   });
-  renderAll();refreshWeather();setInterval(refreshWeather,30*60000);sendLoc();setInterval(()=>{if(!document.hidden)sendLoc()},5*60000);
+  renderAll();refreshWeather();setInterval(refreshWeather,30*60000);sendLoc();setInterval(()=>{if(!document.hidden)sendLoc()},5*60000);enablePush(false);
 }
 S.me=null;
 renderAll();showTab();setInterval(tick,1000);setInterval(()=>{renderTaps();renderSealed()},60000);

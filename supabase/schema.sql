@@ -12,3 +12,6 @@ create policy docs_all on public.docs for all to authenticated using (public.is_
 alter table public.docs replica identity full;
 do 'begin alter publication supabase_realtime add table public.docs; exception when duplicate_object then null; end';
 insert into public.members (email, side) values ('NL_EMAIL', 'nl'), ('MX_EMAIL', 'mx') on conflict (email) do update set side = excluded.side;
+-- Phone notifications: the "notify" edge function keeps its push key pair here. RLS on with no policies = only the service role can read it.
+create table if not exists public.push_keys (id int primary key, pub text not null, priv text not null);
+alter table public.push_keys enable row level security;
