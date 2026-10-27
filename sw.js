@@ -12,3 +12,9 @@ self.addEventListener('notificationclick',e=>{
     return self.clients.openWindow('./');
   }));
 });
+// Always fetch the page itself fresh, so a new version shows the next time the app opens
+// instead of waiting out GitHub Pages' 10-minute cache. Falls back to the normal fetch when offline.
+self.addEventListener('fetch',e=>{
+  if(e.request.mode!=='navigate')return;
+  e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>fetch(e.request)));
+});

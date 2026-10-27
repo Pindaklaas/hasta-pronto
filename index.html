@@ -1084,6 +1084,8 @@ async function start(session){
 }
 S.me=null;
 renderAll();showTab();setInterval(tick,1000);setInterval(()=>{renderTaps();renderSealed()},60000);
+// The service worker also makes sure each app start loads the newest version of the page.
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 const CFG=window.HP_CONFIG||{};
 if(!window.supabase||!CFG.supabaseUrl){$('login').hidden=false;loginMsg('The app is not set up yet.',true)}
 else{
