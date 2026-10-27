@@ -152,16 +152,9 @@ textarea{resize:vertical;min-height:84px}
 .tile span{font-size:12px;color:var(--muted);line-height:1.3}
 @media (max-width:440px){.tiles{grid-template-columns:1fr 1fr 1fr}.tile b{font-size:20px}.tou{grid-template-columns:1fr;justify-items:start}}
 details.settings summary{cursor:pointer;color:var(--muted);font-size:14px}
-/* Health: a daily check-in each, mental and physical; the summary line shows both of you at a glance */
-details.health>summary{cursor:pointer;list-style:none;display:grid;gap:2px}
-details.health>summary::-webkit-details-marker{display:none}
-details.health>summary h3::after{content:" ▾";color:var(--muted);font-size:12px}
-details.health[open]>summary h3::after{content:" ▴"}
-.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-@media (max-width:600px){.hgrid{grid-template-columns:1fr}}
-.hbox{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;align-content:start}
-.hbox h4{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.hbox .q{margin:0;font-weight:600}
+/* Health tab: a daily check-in each, mental and physical */
+#s-health .card{display:grid;gap:10px}
+#s-health .q{margin:0;font-weight:600}
 .hcheck{justify-self:start}
 .hcheck[aria-pressed=true]{background:var(--mx);border-color:var(--mx);color:#fff}
 .hwho{display:grid;gap:4px;font-size:13px}
@@ -231,8 +224,8 @@ details.health[open]>summary h3::after{content:" ▴"}
 
 /* Nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:40}
-nav.tabs ul{list-style:none;margin:0 auto;padding:0;max-width:720px;display:grid;grid-template-columns:repeat(5,1fr)}
-nav.tabs a{display:grid;justify-items:center;gap:2px;padding:6px 0;text-decoration:none;color:var(--muted);font-size:12px;border-radius:8px;position:relative}
+nav.tabs ul{list-style:none;margin:0 auto;padding:0;max-width:720px;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs a{display:grid;justify-items:center;gap:2px;padding:6px 0;text-decoration:none;color:var(--muted);font-size:11px;text-align:center;line-height:1.2;border-radius:8px;position:relative}
 nav.tabs a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs a[aria-current=page]{color:var(--fg);font-weight:600}
 nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--heart);color:#fff;border-radius:999px;font-size:10px;min-width:16px;padding:0 4px;line-height:16px;text-align:center}
@@ -318,24 +311,6 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
       </details>
     </article>
 
-    <details class="card health" id="healthBox">
-      <summary><h3 style="margin:0">Health</h3><span class="small muted" id="healthSum"></span></summary>
-      <div class="hgrid">
-        <section class="hbox" aria-labelledby="h-mental">
-          <h4 id="h-mental">Mental</h4>
-          <p class="q">Did you meditate for 5 minutes today?</p>
-          <button class="btn hcheck" type="button" id="medBtn" aria-pressed="false">🧘 Yes, I meditated</button>
-          <div class="hwho" id="medWho"></div>
-        </section>
-        <section class="hbox" aria-labelledby="h-physical">
-          <h4 id="h-physical">Physical</h4>
-          <p class="q">Did you do a workout today?</p>
-          <div class="chips" id="workChips" role="group" aria-label="Workouts today"></div>
-          <div class="hwho" id="workWho"></div>
-        </section>
-      </div>
-    </details>
-
     <details class="card settings" id="settingsBox">
       <summary>Settings: names, date and place</summary>
       <div class="sgrid">
@@ -390,6 +365,23 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
     </article>
   </section>
 
+  <!-- HEALTH -->
+  <section class="screen" id="s-health" hidden aria-labelledby="h-health">
+    <div><h2 id="h-health">Healthy together</h2><p class="lede">A small daily check-in for body and mind. When you tick something off, the other one gets a notification.</p></div>
+    <article class="card" aria-labelledby="h-mental">
+      <h3 id="h-mental">Mental</h3>
+      <p class="q">Did you meditate for 5 minutes today?</p>
+      <button class="btn hcheck" type="button" id="medBtn" aria-pressed="false">🧘 Yes, I meditated</button>
+      <div class="hwho" id="medWho"></div>
+    </article>
+    <article class="card" aria-labelledby="h-physical">
+      <h3 id="h-physical">Physical</h3>
+      <p class="q">Did you do a workout today?</p>
+      <div class="chips" id="workChips" role="group" aria-label="Workouts today"></div>
+      <div class="hwho" id="workWho"></div>
+    </article>
+  </section>
+
   <!-- TREAT -->
   <section class="screen" id="s-treat" hidden aria-labelledby="h-treat">
     <div><h2 id="h-treat">Send a treat</h2><p class="lede">Surprise them with food or a snack, delivered to their door.</p></div>
@@ -425,6 +417,7 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
 <nav class="tabs" aria-label="Sections"><ul>
   <li><a href="#home" data-tab="home"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Home</a></li>
   <li><a href="#jar" data-tab="jar"><svg viewBox="0 0 24 24"><path d="M8 3h8v3H8zM7 6h10c1.7 0 3 1.3 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V9c0-1.7 1.3-3 3-3z"/><path d="M8 13h4M10 16h5"/></svg>Jar</a></li>
+  <li><a href="#health" data-tab="health"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>Health</a></li>
   <li><a href="#bucket" data-tab="bucket"><svg viewBox="0 0 24 24"><path d="M4 7h16l-2 13H6zM8 7a4 4 0 0 1 8 0"/><path d="M9 13l2 2 4-4"/></svg>Bucket list</a></li>
   <li><a href="#treat" data-tab="treat"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M2 9h20M12 9v12M12 9c-2-4-7-5-7-2s4 2 7 2c3 0 7 1 7-2s-5-2-7 2"/></svg>Treat</a></li>
   <li><a href="#play" data-tab="play"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4M15.5 12h.01M18 14h.01"/></svg>Play</a></li>
@@ -502,7 +495,7 @@ function writeErr(e){
 function requireDb(){if(!db){toast('Still connecting, try again in a moment.');return false}return true}
 
 /* ---------- tabs ---------- */
-const TABS=['home','jar','bucket','treat','play'];
+const TABS=['home','jar','health','bucket','treat','play'];
 function showTab(){
   let t=(location.hash||'#home').slice(1); if(!TABS.includes(t))t='home';
   TABS.forEach(x=>{$('s-'+x).hidden=x!==t});
@@ -899,8 +892,6 @@ function renderHealth(){
   const sides=me?[me,other(me)]:['nl','mx'];
   $('medWho').innerHTML=sides.map(sd=>{const x=hDoc(sd);return line(sd,didMed(x)?'done ✓':'not yet',streak(sd,didMed))}).join('');
   $('workWho').innerHTML=sides.map(sd=>{const x=hDoc(sd);return line(sd,didWork(x)?esc(x.workouts.map(workLabel).join(', '))+' ✓':'not yet',streak(sd,didWork))}).join('');
-  const sum=sd=>{const x=hDoc(sd);return esc(nameOf(sd))+' '+(didMed(x)?'🧘✓':'🧘–')+' '+(didWork(x)?'💪✓':'💪–')};
-  $('healthSum').innerHTML='Today: '+sides.map(sum).join(' · ');
 }
 async function saveHealth(change,note,item){
   if(needMe()||!requireDb())return;
