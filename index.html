@@ -152,6 +152,20 @@ textarea{resize:vertical;min-height:84px}
 .tile span{font-size:12px;color:var(--muted);line-height:1.3}
 @media (max-width:440px){.tiles{grid-template-columns:1fr 1fr 1fr}.tile b{font-size:20px}.tou{grid-template-columns:1fr;justify-items:start}}
 details.settings summary{cursor:pointer;color:var(--muted);font-size:14px}
+/* Health: a daily check-in each, mental and physical; the summary line shows both of you at a glance */
+details.health>summary{cursor:pointer;list-style:none;display:grid;gap:2px}
+details.health>summary::-webkit-details-marker{display:none}
+details.health>summary h3::after{content:" ▾";color:var(--muted);font-size:12px}
+details.health[open]>summary h3::after{content:" ▴"}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:600px){.hgrid{grid-template-columns:1fr}}
+.hbox{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;align-content:start}
+.hbox h4{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.hbox .q{margin:0;font-weight:600}
+.hcheck{justify-self:start}
+.hcheck[aria-pressed=true]{background:var(--mx);border-color:var(--mx);color:#fff}
+.hwho{display:grid;gap:4px;font-size:13px}
+.hwho div{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px}
 
 /* Jar */
@@ -304,6 +318,24 @@ nav.tabs .badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--
       </details>
     </article>
 
+    <details class="card health" id="healthBox">
+      <summary><h3 style="margin:0">Health</h3><span class="small muted" id="healthSum"></span></summary>
+      <div class="hgrid">
+        <section class="hbox" aria-labelledby="h-mental">
+          <h4 id="h-mental">Mental</h4>
+          <p class="q">Did you meditate for 5 minutes today?</p>
+          <button class="btn hcheck" type="button" id="medBtn" aria-pressed="false">🧘 Yes, I meditated</button>
+          <div class="hwho" id="medWho"></div>
+        </section>
+        <section class="hbox" aria-labelledby="h-physical">
+          <h4 id="h-physical">Physical</h4>
+          <p class="q">Did you do a workout today?</p>
+          <div class="chips" id="workChips" role="group" aria-label="Workouts today"></div>
+          <div class="hwho" id="workWho"></div>
+        </section>
+      </div>
+    </details>
+
     <details class="card settings" id="settingsBox">
       <summary>Settings: names, date and place</summary>
       <div class="sgrid">
@@ -423,7 +455,7 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 const S={
   settings:{target:'2026-12-24T00:00',mxzone:'America/Mexico_City',names:{nl:'',mx:''},cities:{nl:{name:'Volkel'},mx:{name:'Tijuana'}}},
   weather:{},
-  me:null, loc:{}, bucket:[], jar:[], taps:{nl:[],mx:[]}, photos:[], links:[],
+  me:null, loc:{}, health:[], bucket:[], jar:[], taps:{nl:[],mx:[]}, photos:[], links:[],
   filter:'todo', day:null, blobs:{}, loaded:{taps:false}
 };
 let db=null, sb=null;
@@ -625,7 +657,7 @@ let pushOn=false;
 function renderPush(){
   const el=$('pushInfo');if(!S.me){el.innerHTML='';return}
   const who=esc(nameOf(partner()));
-  if(pushOn)el.innerHTML='🔔 You get a notification when '+who+' sends a heart or answers the question.';
+  if(pushOn)el.innerHTML='🔔 Notifications are on for hearts, the daily question and health check-ins from '+who+'.';
   else if(!pushOk())el.innerHTML=isIOS()&&!standalone()?'🔔 Open the app from your home screen to turn on notifications.':'';
   else if(Notification.permission==='denied')el.innerHTML='🔕 Notifications are blocked. Allow them for this app in your phone settings.';
   else el.innerHTML='<a href="#" id="pushOn">🔔 Get a notification when '+who+' sends one</a>';
@@ -844,6 +876,46 @@ $('dailySend').addEventListener('click',async()=>{
 });
 $('dailyCancel').addEventListener('click',()=>{S.dailyEditing=false;$('dailyText').value='';renderDaily()});
 
+/* ---------- health ---------- */
+// health/<date>_<side> {date,side,med,workouts:[],sent:[],at}; sent lists what already notified today, so ticking off and on again stays quiet; each person's day follows their own time zone.
+const WORKOUTS=[['gym','Gym','🏋️'],['dance','Dancing','💃'],['walk','Walking','🚶'],['cardio','Cardio / sport','🏃']];
+const workLabel=w=>(WORKOUTS.find(x=>x[0]===w)||[w,w,''])[1];
+const hKey=sd=>dayKey(zoneOf(sd));
+const hDoc=(sd,k)=>S.health.find(d=>d.side===sd&&d.date===(k||hKey(sd)));
+// Days in a row with a check-in, counting back from today (or from yesterday while today is still open).
+function streak(sd,has){
+  let n=0,d=new Date(),k=hKey(sd);
+  if(!has(hDoc(sd,k))){d=new Date(d.getTime()-864e5)}
+  for(;;){k=dayKey(zoneOf(sd),d);if(!has(hDoc(sd,k)))break;n++;d=new Date(d.getTime()-864e5)}
+  return n}
+const didMed=x=>!!(x&&x.med),didWork=x=>!!(x&&x.workouts&&x.workouts.length);
+function renderHealth(){
+  const me=S.me,mine=me?hDoc(me):null;
+  $('medBtn').setAttribute('aria-pressed',didMed(mine)?'true':'false');
+  $('medBtn').textContent=didMed(mine)?'🧘 Meditated today ✓':'🧘 Yes, I meditated';
+  const ws=(mine&&mine.workouts)||[];
+  $('workChips').innerHTML=WORKOUTS.map(([k,l,e])=>'<button class="chip" type="button" role="checkbox" data-w="'+k+'" aria-checked="'+ws.includes(k)+'">'+e+' '+esc(l)+'</button>').join('');
+  const line=(sd,txt,st)=>'<div><span class="dot '+sd+'"></span><b>'+esc(nameOf(sd))+(sd===me?' (you)':'')+'</b><span>'+txt+'</span>'+(st>1?'<span class="muted">· '+st+' days in a row 🔥</span>':'')+'</div>';
+  const sides=me?[me,other(me)]:['nl','mx'];
+  $('medWho').innerHTML=sides.map(sd=>{const x=hDoc(sd);return line(sd,didMed(x)?'done ✓':'not yet',streak(sd,didMed))}).join('');
+  $('workWho').innerHTML=sides.map(sd=>{const x=hDoc(sd);return line(sd,didWork(x)?esc(x.workouts.map(workLabel).join(', '))+' ✓':'not yet',streak(sd,didWork))}).join('');
+  const sum=sd=>{const x=hDoc(sd);return esc(nameOf(sd))+' '+(didMed(x)?'🧘✓':'🧘–')+' '+(didWork(x)?'💪✓':'💪–')};
+  $('healthSum').innerHTML='Today: '+sides.map(sum).join(' · ');
+}
+async function saveHealth(change,note,item){
+  if(needMe()||!requireDb())return;
+  const k=hKey(S.me),cur=hDoc(S.me)||{date:k,side:S.me,med:false,workouts:[]};
+  const sent=(cur.sent||[]).slice();if(note&&sent.includes(item))note=null;if(note)sent.push(item);
+  const next=Object.assign({},cur,change,{date:k,side:S.me,sent,at:Date.now()});delete next.id;
+  try{await db.doc('health/'+k+'_'+S.me).set(next);
+    if(note){sb.functions.invoke('notify',{body:{tag:'health',text:note}}).catch(e=>console.warn('notify',e));toast('Nice! '+nameOf(partner())+' gets a notification')}}
+  catch(e){writeErr(e)}
+}
+$('medBtn').addEventListener('click',()=>{const on=!didMed(S.me&&hDoc(S.me));saveHealth({med:on},on?'Meditated for 5 minutes today 🧘':null,'med')});
+$('workChips').addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b||!S.me)return;
+  const ws=((hDoc(S.me)||{}).workouts||[]).slice(),w=b.dataset.w,on=!ws.includes(w);
+  saveHealth({workouts:on?ws.concat(w):ws.filter(x=>x!==w)},on?'Worked out today: '+workLabel(w)+' 💪':null,w)});
+
 /* ---------- sealed letters ---------- */
 S.sealed=[];
 const ENV='<svg viewBox="0 0 76 52" aria-hidden="true"><rect x="1" y="1" width="74" height="50" rx="4" style="fill:var(--paper);stroke:var(--glass-line);stroke-width:1.5"/><path d="M2 3l36 26 36-26" style="fill:none;stroke:var(--glass-line);stroke-width:1.5"/><circle cx="38" cy="29" r="7" style="fill:var(--heart)"/><path d="M38 33l-3-3c-1.2-1.2-.4-3 1-3 .9 0 1.6.6 2 1.2.4-.6 1.1-1.2 2-1.2 1.4 0 2.2 1.8 1 3z" style="fill:#fff"/></svg>';
@@ -927,7 +999,7 @@ function renderHome(){
   document.querySelectorAll('[data-name]').forEach(el=>el.textContent=nameOf(el.dataset.name));
   $('mePill').innerHTML=S.me?'<b>'+esc(nameOf(S.me))+'</b> · log out':'';
 }
-function renderAll(){fillSettingsForm();renderDistance();renderPush();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
+function renderAll(){fillSettingsForm();renderDistance();renderPush();renderHealth();renderHome();renderSealed();renderDaily();renderWeather();renderTreat();renderTaps();renderJar();renderBucket();renderLinks();tick()}
 
 /* ---------- shared data (Supabase) ---------- */
 function makeDb(sb){
@@ -1007,6 +1079,7 @@ async function start(session){
   db.collection('daily').orderBy('at','desc').limit(200).onSnapshot(s=>{S.daily=rows(s);renderDaily()});
   db.collection('profile').onSnapshot(s=>{s.docs.forEach(d=>{S.profiles[d.id]=d.data()});renderTreat()});
   db.collection('loc').onSnapshot(s=>{S.loc={};s.docs.forEach(d=>{S.loc[d.id]=d.data()});renderDistance()});
+  db.collection('health').onSnapshot(s=>{S.health=rows(s);renderHealth()});
   db.collection('sealed').onSnapshot(s=>{S.sealed=rows(s);renderSealed()});
   db.collection('links').onSnapshot(s=>{S.links=rows(s);renderLinks()});
   db.collection('taps').onSnapshot(s=>{
